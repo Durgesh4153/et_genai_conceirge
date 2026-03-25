@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
+<<<<<<< HEAD
   "newProjectRoot": "projects",
   "projects": {
     "et-concierge": {
@@ -11,11 +12,22 @@
           "standalone": true
         }
       },
+=======
+  "cli": {
+    "packageManager": "npm"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "frontend_genai": {
+      "projectType": "application",
+      "schematics": {},
+>>>>>>> 3674767e7d9be2f56238025a8fc21e1ade8e8204
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
       "architect": {
         "build": {
+<<<<<<< HEAD
           "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "dist/et-concierge",
@@ -26,12 +38,40 @@
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": ["src/styles/global.scss"],
             "scripts": []
+=======
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.css"
+            ]
+>>>>>>> 3674767e7d9be2f56238025a8fc21e1ade8e8204
           },
           "configurations": {
             "production": {
               "budgets": [
+<<<<<<< HEAD
                 { "type": "initial", "maximumWarning": "500kb", "maximumError": "1mb" },
                 { "type": "anyComponentStyle", "maximumWarning": "4kb", "maximumError": "8kb" }
+=======
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+>>>>>>> 3674767e7d9be2f56238025a8fc21e1ade8e8204
               ],
               "outputHashing": "all"
             },
@@ -44,6 +84,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
+<<<<<<< HEAD
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": { "buildTarget": "et-concierge:build:production" },
@@ -56,5 +97,23 @@
   },
   "cli": {
     "analytics": false
+=======
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "frontend_genai:build:production"
+            },
+            "development": {
+              "buildTarget": "frontend_genai:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    }
+>>>>>>> 3674767e7d9be2f56238025a8fc21e1ade8e8204
   }
 }
