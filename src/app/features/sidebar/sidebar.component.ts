@@ -35,19 +35,19 @@ import { ChatService } from '../../services/chat.service';
       <!-- Concierge nav -->
       <div class="nav-group">
         <div class="nav-label">Concierge</div>
-        <div class="nav-item active"><span class="ni">◈</span> AI Navigator</div>
-        <div class="nav-item"><span class="ni">◎</span> My Portfolio <span class="badge">Live</span></div>
-        <div class="nav-item"><span class="ni">◇</span> Goals Tracker</div>
+        <div class="nav-item" [class.active]="activeNav === 'AI Navigator'" (click)="handleNavClick('AI Navigator')"><span class="ni">◈</span> AI Navigator</div>
+        <div class="nav-item" [class.active]="activeNav === 'My Portfolio'" (click)="handleNavClick('My Portfolio')"><span class="ni">◎</span> My Portfolio <span class="badge">Live</span></div>
+        <div class="nav-item" [class.active]="activeNav === 'Goals Tracker'" (click)="handleNavClick('Goals Tracker')"><span class="ni">◇</span> Goals Tracker</div>
       </div>
 
       <!-- ET Ecosystem nav -->
       <div class="nav-group">
         <div class="nav-label">ET Ecosystem</div>
-        <div class="nav-item"><span class="ni">▣</span> ET Prime <span class="badge">Active</span></div>
-        <div class="nav-item"><span class="ni">◈</span> ET Markets</div>
-        <div class="nav-item"><span class="ni">◎</span> Masterclasses <span class="badge new">3 New</span></div>
-        <div class="nav-item"><span class="ni">◇</span> Wealth Events</div>
-        <div class="nav-item"><span class="ni">▣</span> Services Hub</div>
+        <div class="nav-item" [class.active]="activeNav === 'ET Prime'" (click)="handleNavClick('ET Prime')"><span class="ni">▣</span> ET Prime <span class="badge">Active</span></div>
+        <div class="nav-item" [class.active]="activeNav === 'ET Markets'" (click)="handleNavClick('ET Markets')"><span class="ni">◈</span> ET Markets</div>
+        <div class="nav-item" [class.active]="activeNav === 'Masterclasses'" (click)="handleNavClick('Masterclasses')"><span class="ni">◎</span> Masterclasses <span class="badge new">3 New</span></div>
+        <div class="nav-item" [class.active]="activeNav === 'Wealth Events'" (click)="handleNavClick('Wealth Events')"><span class="ni">◇</span> Wealth Events</div>
+        <div class="nav-item" [class.active]="activeNav === 'Services Hub'" (click)="handleNavClick('Services Hub')"><span class="ni">▣</span> Services Hub</div>
       </div>
 
       <!-- Ecosystem coverage -->
@@ -144,4 +144,31 @@ export class SidebarComponent {
   profile   = inject(UserProfileService);
   portfolio = inject(PortfolioService);
   chat      = inject(ChatService);
+
+  activeNav: string = 'AI Navigator';
+
+  handleNavClick(navItem: string) {
+    this.activeNav = navItem;
+    
+    // Wire up to existing Mock Backend
+    if (navItem === 'AI Navigator') {
+      this.chat.setMode('Navigator');
+      // Reset by saying hi or start over if needed
+      this.chat.sendMessage('Hi');
+    } else if (navItem === 'My Portfolio') {
+      this.chat.sendMessage('Show me my full portfolio snapshot');
+    } else if (navItem === 'Goals Tracker') {
+      this.chat.setMode('Goals');
+    } else if (navItem === 'ET Prime') {
+      this.chat.sendMessage('What is new on ET Prime today?');
+    } else if (navItem === 'ET Markets') {
+      this.chat.setMode('Markets');
+    } else if (navItem === 'Masterclasses') {
+      this.chat.sendMessage('Show all upcoming ET masterclasses');
+    } else if (navItem === 'Wealth Events') {
+      this.chat.sendMessage('Register me for ET Wealth Summit on March 28');
+    } else if (navItem === 'Services Hub') {
+      this.chat.setMode('Services');
+    }
+  }
 }
