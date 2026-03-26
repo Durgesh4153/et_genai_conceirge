@@ -32,7 +32,7 @@ import { AgentType } from '../../models';
         @for (msg of chat.messages(); track msg.id) {
           <div class="msg-row" [class.user]="msg.role === 'user'" [class.interrupt]="msg.interrupt">
             <div [class]="msg.role === 'ai' ? 'msg-avatar ai agent-' + msg.agent : 'msg-avatar user-av'">
-              {{ msg.role === 'ai' ? 'ET' : 'R' }}
+              {{ msg.role === 'ai' ? 'ET' : 'You' }}
             </div>
             <div class="msg-content" [class.user-content]="msg.role === 'user'">
               @if (msg.role === 'ai') {
@@ -83,8 +83,8 @@ import { AgentType } from '../../models';
     .chat-messages { flex:1; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:1rem; }
     .msg-row { display:flex; gap:10px; }
     .msg-row.user { flex-direction:row-reverse; }
-    .msg-avatar { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
-    .msg-avatar.ai { background:var(--gold-dim); }
+    .msg-avatar { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; }
+    .msg-avatar.ai { background:var(--gold-dim); font-size:11px; }
     .msg-avatar.user-av { background:var(--bg3); }
     .msg-content { display:flex; flex-direction:column; max-width:70%; }
     .msg-bubble { padding:10px 14px; border-radius:12px; background:var(--bg2); }
