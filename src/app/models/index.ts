@@ -75,6 +75,7 @@ export interface TickerItem {
   sym:   string;
   value: string;
   up:    boolean;
+  pct:   string;
 }
 
 export interface MarketSnapshot {
