@@ -91,7 +91,7 @@ RESPONSE RULES:
         role:     'ai',
         agent:    'navigator',
         timestamp: new Date(),
-        text:     `Good morning, <strong class="text-gold">Rohan</strong>. Markets are up — NIFTY +0.74%. Your portfolio outperformed by 1.2% this month. I've identified <strong class="text-gold">4 opportunities</strong> matched to your wealth profile today. Here's your briefing:`,
+        text:     `Good morning, <strong class="text-gold">Durgesh </strong>. Markets are up — NIFTY +0.74%. Your portfolio outperformed by 1.2% this month. I've identified <strong class="text-gold">4 opportunities</strong> matched to your wealth profile today. Here's your briefing:`,
         insights: greetingInsights,
         chips,
       },
@@ -363,7 +363,7 @@ RESPONSE RULES:
       ];
 
     } else if (t.includes('hello') || t.includes('hi ') || t.includes('good morning') || t.includes('hey') || t.match(/^hi$/i)) {
-      text = `Good to have you back, <strong class="text-gold">Rohan</strong>. NIFTY is up today — your portfolio outperformed. You have 4 matched opportunities and the ET Wealth Summit is in 3 days. Your retirement gap is the priority action this week. Where shall we start?`;
+      text = `Good to have you back, <strong class="text-gold">Durgesh </strong>. NIFTY is up today — your portfolio outperformed. You have 4 matched opportunities and the ET Wealth Summit is in 3 days. Your retirement gap is the priority action this week. Where shall we start?`;
       chips = [
         { label: 'Portfolio snapshot',       highlight: false, prompt: 'Show me my full portfolio snapshot' },
         { label: 'Close retirement gap',     highlight: true,  prompt: 'How do I close my retirement gap of 29 lakhs?' },

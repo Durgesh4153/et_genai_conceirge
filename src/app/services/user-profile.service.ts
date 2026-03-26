@@ -6,8 +6,8 @@ export class UserProfileService {
 
   readonly profile = signal<UserProfile>({
     id:                'user-001',
-    name:              'Rohan Mehta',
-    initials:          'RM',
+    name:              'Durgesh Nandan',
+    initials:          'DN',
     tier:              'wealth',
     discoveryScore:    68,
     creditScore:       786,
