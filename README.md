@@ -4,7 +4,6 @@
 [![Angular 19](https://img.shields.io/badge/Angular-19.0-DD0031?style=for-the-badge&logo=angular)](https://angular.io/)
 [![Gemini 1.5 Flash](https://img.shields.io/badge/Google_Gemini-1.5_Flash-4285F4?style=for-the-badge&logo=google)](https://aistudio.google.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-[![Status](https://img.shields.io/badge/Hackathon-Submission_Ready-gold?style=for-the-badge)](./)
 
 ---
 
@@ -85,4 +84,4 @@ graph TD
 > [!NOTE]
 > **Why we win?** Most submissions are passive bots. **ET Concierge** is proactive. It doesn't wait for questions; it monitors the market and the user's intent to **hook** them with data and drive them towards an **action**.
 
-*Submission for the ET AI Hackathon 2026.*
+*Submission for the [ET AI Hackathon 2026](https://unstop.com/o/uka4pYs?lb=2MTtH12h&utm_medium=Share&utm_source=competitions&utm_campaign=Durgenan95498).*
