@@ -1,15 +1,17 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { UserProfile, ProfilingQuestion, AgentStatus } from '../models';
+import { PortfolioService } from './portfolio.service';
 
 @Injectable({ providedIn: 'root' })
 export class UserProfileService {
+  private portfolioService = inject(PortfolioService);
 
   readonly profile = signal<UserProfile>({
     id:                'user-001',
     name:              'Durgesh Nandan',
     initials:          'DN',
     tier:              'wealth',
-    discoveryScore:    68,
+    discoveryScore:    12,         // Start LOW — "most users discover only 10%"
     creditScore:       786,
     annualIncome:      1_800_000,
     monthlyInvestable: 100_000,
@@ -23,6 +25,47 @@ export class UserProfileService {
   readonly showProfilingModal = signal<boolean>(true);
   readonly profilingStep      = signal<number>(0);
   readonly selectedOption     = signal<string | null>(null);
+
+  // ── Discovery Score breakdown — tracks which ET touchpoints the user has explored ──
+  readonly discoveryBreakdown = signal<Record<string, { unlocked: boolean; pts: number; label: string }>>({
+    profile:      { unlocked: false, pts: 15, label: 'Profile & Risk Assessment' },
+    primeContent: { unlocked: false, pts: 10, label: 'ET Prime Articles' },
+    markets:      { unlocked: false, pts: 12, label: 'ET Markets & Portfolio' },
+    services:     { unlocked: false, pts: 10, label: 'Financial Services Hub' },
+    masterclass:  { unlocked: false, pts: 10, label: 'ET Masterclasses' },
+    events:       { unlocked: false, pts: 8,  label: 'Wealth Events' },
+    crossSell:    { unlocked: false, pts: 10, label: 'Cross-Sell Opportunity' },
+    portfolioSync:{ unlocked: false, pts: 15, label: 'Portfolio Sync & Analysis' },
+    goalSetting:  { unlocked: false, pts: 10, label: 'Financial Goal Setting' },
+  });
+
+  /** Computed score from actual interactions — no static jumps */
+  readonly computedScore = computed(() => {
+    const base = 12; // Everyone starts with 12 (just having an account)
+    const breakdown = this.discoveryBreakdown();
+    let earned = 0;
+    for (const key of Object.keys(breakdown)) {
+      if (breakdown[key].unlocked) earned += breakdown[key].pts;
+    }
+    return Math.min(base + earned, 100);
+  });
+
+  /** Score tier label */
+  readonly scoreTierLabel = computed(() => {
+    const s = this.computedScore();
+    if (s >= 85) return 'Elite Explorer · ET Wealth RM unlocked';
+    if (s >= 60) return 'Power User · 3 more services to unlock RM';
+    if (s >= 35) return 'Getting started · explore more of ET';
+    return 'New user · discover the ET ecosystem';
+  });
+
+  /** Percentage of ET ecosystem explored */
+  readonly ecosystemPct = computed(() => {
+    const bd = this.discoveryBreakdown();
+    const total = Object.keys(bd).length;
+    const unlocked = Object.values(bd).filter(v => v.unlocked).length;
+    return Math.round((unlocked / total) * 100);
+  });
 
   readonly tierLabel = computed(() => {
     switch (this.profile().tier) {
@@ -106,14 +149,47 @@ export class UserProfileService {
     this.activateAgents(['navigator', 'opportunity']);
   }
 
+  /** "Already a Member" — skip questionnaire, load pre-built portfolio, unlock discovery */
+  loginAsMember(): void {
+    this.profile.update(p => ({
+      ...p,
+      goal: 'Grow my wealth — equity, mutual funds, alternatives',
+      horizon: '10+ years',
+      etUsage: 'Multiple ET services',
+      blindSpot: 'Portfolio rebalancing',
+      profileComplete: true,
+    }));
+    this.portfolioService.loadMemberPortfolio();
+    // Unlock several discovery touchpoints for a returning member
+    this.unlockDiscovery('profile');
+    this.unlockDiscovery('primeContent');
+    this.unlockDiscovery('portfolioSync');
+    this.showProfilingModal.set(false);
+    this.activateAgents(['navigator', 'opportunity', 'fulfilment']);
+  }
+
   private completeProfile(): void {
     this.profile.update(p => ({
       ...p,
-      profileComplete:  true,
-      discoveryScore:   Math.min(p.discoveryScore + 15, 100),
+      profileComplete: true,
     }));
+    this.portfolioService.updatePortfolioFromProfile(this.profile());
+    this.unlockDiscovery('profile');
+    this.unlockDiscovery('portfolioSync');
     this.showProfilingModal.set(false);
     this.activateAgents(['navigator', 'opportunity', 'fulfilment']);
+  }
+
+  /** Unlock a discovery touchpoint — this is the core of the hackathon pitch */
+  unlockDiscovery(key: string): void {
+    this.discoveryBreakdown.update(bd => {
+      if (bd[key] && !bd[key].unlocked) {
+        return { ...bd, [key]: { ...bd[key], unlocked: true } };
+      }
+      return bd;
+    });
+    // Sync score into profile for context summary
+    this.profile.update(p => ({ ...p, discoveryScore: this.computedScore() }));
   }
 
   activateAgents(types: string[]): void {
@@ -133,12 +209,11 @@ export class UserProfileService {
       `ET Tier: ${this.tierLabel()}`,
       `Credit Score: ${p.creditScore}`,
       `Annual Income: ₹${(p.annualIncome / 100000).toFixed(0)}L`,
-      `Monthly Investable: ₹${(p.monthlyInvestable / 1000).toFixed(0)}K`,
       `Primary Goal: ${p.goal ?? 'Not specified'}`,
       `Investment Horizon: ${p.horizon ?? 'Not specified'}`,
       `ET Usage: ${p.etUsage ?? 'Not specified'}`,
       `Financial Blind Spot: ${p.blindSpot ?? 'Not specified'}`,
-      `Discovery Score: ${p.discoveryScore}/100`,
+      `Discovery Score: ${this.computedScore()}/100 (${this.ecosystemPct()}% of ET explored)`,
     ].join('\n');
   }
 }

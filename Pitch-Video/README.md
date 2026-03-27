@@ -1,31 +1,10 @@
-# ET Concierge — Visual Submission Walkthrough
+# ET Concierge — 3-Minute Pitch Video
 
-Since the agentic workflow is highly interactive, we have captured the key moments of the user journey to demonstrate the "Smart Profiling" and "Proactive Advisory" layers.
+Due to the nature of the hackathon submission format, the video file demonstrating the complete, end-to-end agentic workflow is hosted externally or provided alongside the submission via a cloud drive. 
 
-## 1. Onboarding & Smart Profiling
-The journey begins with a 3-minute smart profiling flow that establishes the user's financial goals and constraints.
-
-![Onboarding Start](./onboarding-start.png)
-*Step 1: The 'Welcome Concierge' modal identifies the user's primary motivation.*
-
-![Goal Selection](./onboarding-goals.png)
-*Step 2: Interactive selections for wealth growth, investment horizon, and surplus.*
-
-![Blind Spot Identification](./onboarding-blindspot.png)
-*Step 3: Finding the user's biggest financial "Blind Spot" (e.g., Tax Optimisation) to prime the Navigator Agent.*
-
----
-
-## 2. The Agentic Dashboard
-Once the profile is built, the Multi-Agent Orchestrator (Navigator, Opportunity, and Fulfilment agents) takes over.
-
-![Dashboard Final](./dashboard-final.png)
-
-### Key Features Demonstrated:
-- **Proactive Memory**: The agent "remembers" the ₹29L retirement gap identified during profiling.
-- **Navigator Insight**: Real-time Nifty 50 analysis combined with FY26 Tax optimization tips.
-- **Matched Opportunities**: High-impact "Action Chips" (Quant Mid Cap, HDFC Home Loan) that link live market data directly to conversational fulfillment.
-- **Discovery Score**: A gamified 83/100 score that encourages deeper engagement with the ET ecosystem.
-
----
-**Winning Vision**: Moving ET from a "Read-Only" destination to an "Execute-Always" financial companion.
+## What the Video Highlights:
+1. **The Problem**: Users discovering only 10% of the ET Ecosystem.
+2. **The "Welcome Concierge"**: Demonstrating the premium, glassmorphism UI of the 3-minute profiling flow that instantly builds a ~₹1.2Cr mock portfolio.
+3. **The "Financial Life Navigator"**: Showing the core chat engine pulling LIVE SENSEX and NIFTY quotes, mapping them directly to the user's generated net worth.
+4. **The "Cross-Sell Engine"**: Demonstrating how typing "Suggest a good credit card" natively unlocks the *Financial Services Hub* in the sidebar and presents an actionable Axis Card recommendation inline within the chat. 
+5. **The Gamified Discovery Score**: Proving how the left navigation dynamically unlocks and scores points based on user interaction to incentivize full ecosystem exploration.
