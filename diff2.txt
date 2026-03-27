@@ -1,0 +1,5 @@
+﻿ac1b6528 feat: replace markdown docs with interactive styling-heavy HTML Pitch Deck
+43ae0f09 feat: ET Concierge Hackathon Submission ÔÇö Full Premium UI, Chat Agent & Discovery Engine
+3b66896a docs: replace broken video with high-quality visual presentation walkthrough
+bd477054 docs: finalize hackathon submission artifacts (Impact Model, Architecture, Pitch Video)
+749a93fb docs: finalize submission requirements with impact model and enhanced architecture

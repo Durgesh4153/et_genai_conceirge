@@ -1,0 +1,25 @@
+﻿ac1b6528 feat: replace markdown docs with interactive styling-heavy HTML Pitch Deck
+A	Pitch-Video/demo.webp
+A	Pitch-Video/presentation.html
+43ae0f09 feat: ET Concierge Hackathon Submission ÔÇö Full Premium UI, Chat Agent & Discovery Engine
+M	Architecture/Architecture.md
+A	Impact-Model/business-impact.md
+M	Pitch-Video/README.md
+D	dist/et-concierge/3rdpartylicenses.txt
+M	dist/et-concierge/browser/index.html
+D	dist/et-concierge/browser/polyfills-B6TNHZQ6.js
+D	dist/et-concierge/browser/styles-PAZWDH3P.css
+M	src/app/features/chat/chat.component.ts
+M	src/app/features/profiling/profiling-modal.component.ts
+M	src/app/features/right-panel/right-panel.component.ts
+M	src/app/features/sidebar/sidebar.component.ts
+M	src/app/services/chat.service.ts
+M	src/app/services/portfolio.service.ts
+M	src/app/services/user-profile.service.ts
+3b66896a docs: replace broken video with high-quality visual presentation walkthrough
+A	Pitch-Video/README.md
+A	Pitch-Video/dashboard-final.png
+A	Pitch-Video/onboarding-blindspot.png
+A	Pitch-Video/onboarding-goals.png
+A	Pitch-Video/onboarding-start.png
+D	Pitch-Video/pitch-video.webp
