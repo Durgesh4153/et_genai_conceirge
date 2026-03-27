@@ -1,20 +1,19 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { Portfolio, Opportunity, JourneyStep, ServiceTile, EcosystemCoverage } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class PortfolioService {
 
+  // ── Portfolio starts EMPTY — only populated after profiling ──────────────
   readonly portfolio = signal<Portfolio>({
-    totalNetWorth:    62_400_000,
-    monthlyChange:    3_100_000,
-    monthlyChangePct: 5.2,
-    allocations: [
-      { name: 'Equity MFs',    percentage: 55, value: 34_320_000, color: 'var(--gold)',  change: 2.4  },
-      { name: 'Direct Stocks', percentage: 18, value: 11_232_000, color: 'var(--blue)',  change: 1.8  },
-      { name: 'FD / Debt',     percentage: 15, value:  9_360_000, color: 'var(--green)', change: 0.6  },
-      { name: 'Gold / RE',     percentage: 12, value:  7_488_000, color: 'var(--amber)', change: 0.3  },
-    ],
+    totalNetWorth:    0,
+    monthlyChange:    0,
+    monthlyChangePct: 0,
+    allocations:      [],
   });
+
+  /** True once a real portfolio has been generated (either via profiling or member login) */
+  readonly isReady = computed(() => this.portfolio().totalNetWorth > 0);
 
   readonly opportunities = signal<Opportunity[]>([
     {
@@ -45,7 +44,7 @@ export class PortfolioService {
     {
       id:          'opp-axis',
       name:        'Axis Ace Card — Pre-approved',
-      description: '2% cashback, no first-year fee. Your CIBIL 786 qualifies instantly.',
+      description: '2% cashback, no first-year fee. Your CIBIL qualifies instantly.',
       tag:         'service',
       keywords:    ['credit card', 'cashback', 'card', 'credit', 'spend'],
       prompt:      'Tell me about the Axis Ace credit card pre-approval',
@@ -83,11 +82,78 @@ export class PortfolioService {
     return `₹${value}`;
   }
 
-  // Called by Opportunity Agent when a keyword match is detected
   getOpportunityByKeyword(input: string): Opportunity | null {
     const t = input.toLowerCase();
     return this.opportunities().find(o =>
       o.keywords.some(kw => t.includes(kw))
     ) ?? null;
+  }
+
+  // ── Deterministic portfolio generation based on profile answers ──────────
+  updatePortfolioFromProfile(profile: any): void {
+    const inv = profile.monthlyInvestable;
+    let baseNW: number;
+
+    // Map investable surplus → estimated net worth (deterministic, no randomness)
+    if (typeof inv === 'string') {
+      if (inv.includes('Under'))          baseNW = 8_00_000;
+      else if (inv.includes('10,000–50')) baseNW = 35_00_000;
+      else if (inv.includes('50,000–2L')) baseNW = 1_80_00_000;
+      else if (inv.includes('Over'))      baseNW = 6_24_00_000;
+      else                                baseNW = 50_00_000;
+    } else if (typeof inv === 'number') {
+      if (inv < 10000)       baseNW = 8_00_000;
+      else if (inv < 50000)  baseNW = 35_00_000;
+      else if (inv < 200000) baseNW = 1_80_00_000;
+      else                   baseNW = 6_24_00_000;
+    } else {
+      baseNW = 50_00_000;
+    }
+
+    // Adjust allocation based on goal
+    const goal = (profile.goal ?? '').toLowerCase();
+    let eqPct = 45, stPct = 15, dePct = 25, goPct = 15;
+
+    if (goal.includes('grow'))      { eqPct = 55; stPct = 20; dePct = 15; goPct = 10; }
+    else if (goal.includes('protect')) { eqPct = 20; stPct = 10; dePct = 50; goPct = 20; }
+    else if (goal.includes('milestone')) { eqPct = 40; stPct = 15; dePct = 35; goPct = 10; }
+    else if (goal.includes('credit'))   { eqPct = 30; stPct = 15; dePct = 40; goPct = 15; }
+
+    // Adjust growth expectations based on horizon
+    const horizon = (profile.horizon ?? '').toLowerCase();
+    let momPct = 3.2;
+    if (horizon.includes('10+'))       momPct = 5.8;
+    else if (horizon.includes('5–10')) momPct = 4.5;
+    else if (horizon.includes('2–5'))  momPct = 3.2;
+    else if (horizon.includes('less')) momPct = 1.8;
+
+    const monthlyChange = Math.floor(baseNW * (momPct / 100));
+
+    this.portfolio.set({
+      totalNetWorth:    baseNW,
+      monthlyChange,
+      monthlyChangePct: momPct,
+      allocations: [
+        { name: 'Equity MFs',    percentage: eqPct, value: Math.floor(baseNW * eqPct / 100), color: 'var(--gold)',  change: +(momPct * 1.2).toFixed(1) },
+        { name: 'Direct Stocks', percentage: stPct, value: Math.floor(baseNW * stPct / 100), color: 'var(--blue)',  change: +(momPct * 0.8).toFixed(1) },
+        { name: 'FD / Debt',     percentage: dePct, value: Math.floor(baseNW * dePct / 100), color: 'var(--green)', change: +(momPct * 0.2).toFixed(1) },
+        { name: 'Gold / RE',     percentage: goPct, value: Math.floor(baseNW * goPct / 100), color: 'var(--amber)', change: +(momPct * 0.15).toFixed(1) },
+      ],
+    });
+  }
+
+  // ── Pre-built member portfolio (for "Already a Member" flow) ────────────
+  loadMemberPortfolio(): void {
+    this.portfolio.set({
+      totalNetWorth:    1_20_00_000,
+      monthlyChange:    5_40_000,
+      monthlyChangePct: 4.7,
+      allocations: [
+        { name: 'Equity MFs',    percentage: 48, value: 57_60_000, color: 'var(--gold)',  change: 5.2 },
+        { name: 'Direct Stocks', percentage: 22, value: 26_40_000, color: 'var(--blue)',  change: 3.8 },
+        { name: 'FD / Debt',     percentage: 18, value: 21_60_000, color: 'var(--green)', change: 0.6 },
+        { name: 'Gold / RE',     percentage: 12, value: 14_40_000, color: 'var(--amber)', change: 1.2 },
+      ],
+    });
   }
 }

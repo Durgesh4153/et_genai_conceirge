@@ -37,7 +37,7 @@ export class ChatService {
     const m = this.market.snapshot();
     const p = this.portfolio.portfolio();
     const user = this.userSvc.profile();
-    const hasPortfolio = this.userSvc.profile().profileComplete;
+    const hasPortfolio = this.portfolio.isReady();
 
     const portfolioBlock = hasPortfolio
       ? `REAL-TIME PORTFOLIO (LIVE):
@@ -46,12 +46,13 @@ export class ChatService {
 - Allocations: ${p.allocations.map(a => `${a.name}: ${a.percentage}% (${this.portfolio.formatCurrency(a.value)}, ${a.change > 0 ? '+' : ''}${a.change}%)`).join(' | ')}`
       : `PORTFOLIO: User has not yet completed profiling. Encourage them to complete their 3-minute profile.`;
 
-    return `You are ET Concierge — a premium AI financial intelligence engine by Economic Times.
-You combine the analytical depth of a Bloomberg terminal with the warmth of a private wealth manager.
+    return `You are Durgesh — the premium AI persona behind ET Concierge.
+You combine the analytical depth of a Bloomberg terminal with the personalized warmth of an elite private banker.
 
 PERSONALITY:
-- Speak like a knowledgeable friend who happens to be a top financial advisor.
-- Be specific: use ₹ amounts, fund names, SENSEX/NIFTY numbers, percentage returns.
+- Speak like a sophisticated, market-savvy financial elite who is also a trusted, proactive partner.
+- Your goal is to guide the user towards financial freedom using the Economic Times (ET) ecosystem.
+- Be specific: use ₹ amounts, fund names, SENSEX/NIFTY numbers, and percentage returns.
 - Be concise — under 75 words. Every word must earn its place.
 - ALWAYS end with a strategic question or choice for the user.
 
@@ -72,11 +73,11 @@ LIVE MARKET DATA (refresh every 15s):
 - USD/INR: ${m.usdinr.value}
 
 RULES:
-- Use <strong> HTML tags for emphasis. Use bullet points.
-- Reference SENSEX/NIFTY data when discussing markets or portfolio strategy.
-- Reference the user's actual portfolio numbers when discussing their wealth.
-- Never say "I'm an AI" — you are ET Concierge.
-- Never give generic advice — always tie recommendations to the user's specific profile.`;
+- Use <strong> HTML tags for emphasis. Use bullet points for readability.
+- Reference SENSEX/NIFTY data whenever discussing market moves or portfolio impact.
+- Reference the user's specific portfolio numbers to ensure advice is grounded in their reality.
+- Never mention being an AI — you are "Durgesh," the soul of ET Concierge.
+- Keep the tone elite, proactive, and outcome-oriented.`;
   }
 
   // ── Initialise ────────────────────────────────────────────────────────────
@@ -87,7 +88,7 @@ RULES:
   private loadInitialMessages(): void {
     const m = this.market.snapshot();
     const user = this.userSvc.profile();
-    const hasPortfolio = this.userSvc.profile().profileComplete;
+    const hasPortfolio = this.portfolio.isReady();
 
     const sensexDir = m.sensex.pct >= 0 ? 'up' : 'down';
     const sensexColor = m.sensex.pct >= 0 ? 'green' : 'red';
@@ -98,7 +99,8 @@ RULES:
 
     if (hasPortfolio) {
       const p = this.portfolio.portfolio();
-      greetingText = `Good evening, <strong class="text-gold">${user.name.split(' ')[0]}</strong>. Markets are ${sensexDir} today — <strong class="text-${sensexColor}">SENSEX ${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%</strong> at ${m.sensex.value.toLocaleString()}. Your portfolio is at <strong class="text-gold">${this.portfolio.formatCurrency(p.totalNetWorth)}</strong>, ${p.monthlyChangePct > 0 ? 'up' : 'flat'} ${p.monthlyChangePct}% this month. <strong class="text-gold">Where should we focus — portfolio review, tax strategy, or market opportunities?</strong>`;
+      const firstName = user.name.split(' ')[0];
+      greetingText = `Good evening, <strong class="text-gold">${firstName}</strong>. I'm <strong>Durgesh</strong>, your ET Concierge. Markets are ${sensexDir} today — <strong class="text-${sensexColor}">SENSEX ${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%</strong>. Your portfolio is at <strong class="text-gold">${this.portfolio.formatCurrency(p.totalNetWorth)}</strong>, ${p.monthlyChangePct > 0 ? 'up' : 'flat'} ${p.monthlyChangePct}% this month. <strong class="text-gold">Which area of your wealth should we optimize tonight — taxes, allocation, or market opportunities?</strong>`;
       greetingInsights = [
         { label: 'Net Worth', value: this.portfolio.formatCurrency(p.totalNetWorth), sub: `+${p.monthlyChangePct}% MoM`, color: 'gold', action: 'portfolio' },
         { label: 'SENSEX', value: `${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%`, sub: `at ${m.sensex.value.toLocaleString()}`, color: m.sensex.pct >= 0 ? 'green' : 'red', action: 'markets' },
@@ -106,7 +108,8 @@ RULES:
         { label: 'Gold', value: `₹${m.gold.value.toLocaleString()}`, sub: `${m.gold.pct >= 0 ? '+' : ''}${m.gold.pct}%`, color: 'gold', action: 'gold' },
       ];
     } else {
-      greetingText = `Welcome to <strong class="text-gold">ET Concierge</strong>, ${user.name.split(' ')[0]}! I'm your personal financial intelligence layer, powered by Economic Times. Markets are ${sensexDir} — <strong class="text-${sensexColor}">SENSEX ${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%</strong>. Complete your quick profile and I'll unlock personalised portfolio insights. <strong class="text-gold">Ask me anything about markets, investments, or tax strategy!</strong>`;
+      const firstName = user.name.split(' ')[0];
+      greetingText = `Welcome to your personal <strong>ET Concierge</strong>, ${firstName}. I'm <strong>Durgesh</strong>. I'm currently monitoring markets: ${sensexDir} <strong class="text-${sensexColor}">SENSEX ${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%</strong>. To unlock your full wealth potential and personalized insights, we should complete your 3-minute profile. <strong class="text-gold">Shall we start profiling, or would you like a market pulse first?</strong>`;
       greetingInsights = [
         { label: 'SENSEX', value: `${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%`, sub: `at ${m.sensex.value.toLocaleString()}`, color: m.sensex.pct >= 0 ? 'green' : 'red', action: 'markets' },
         { label: 'NIFTY', value: `${m.nifty.pct >= 0 ? '+' : ''}${m.nifty.pct}%`, sub: `at ${m.nifty.value.toLocaleString()}`, color: m.nifty.pct >= 0 ? 'green' : 'red', action: 'markets' },
@@ -147,6 +150,17 @@ RULES:
       ...msgs,
       { id: this.mkId(), role: 'user', timestamp: new Date(), text },
     ]);
+
+    // ── Discovery tracking — unlock ET touchpoints based on conversation topics ──
+    const t = text.toLowerCase();
+    if (t.includes('market') || t.includes('sensex') || t.includes('nifty')) this.userSvc.unlockDiscovery('markets');
+    if (t.includes('prime') || t.includes('article') || t.includes('read')) this.userSvc.unlockDiscovery('primeContent');
+    if (t.includes('portfolio') || t.includes('net worth') || t.includes('allocation')) this.userSvc.unlockDiscovery('portfolioSync');
+    if (t.includes('masterclass') || t.includes('course') || t.includes('learn')) this.userSvc.unlockDiscovery('masterclass');
+    if (t.includes('event') || t.includes('summit') || t.includes('webinar')) this.userSvc.unlockDiscovery('events');
+    if (t.includes('service') || t.includes('card') || t.includes('loan') || t.includes('insurance')) this.userSvc.unlockDiscovery('services');
+    if (t.includes('goal') || t.includes('retire') || t.includes('target')) this.userSvc.unlockDiscovery('goalSetting');
+    if (t.includes('recommend') || t.includes('suggest') || t.includes('should i')) this.userSvc.unlockDiscovery('crossSell');
 
     // Opportunity Agent: keyword interrupt check
     const opportunityMatch = this.portfolio.getOpportunityByKeyword(text);
@@ -279,7 +293,7 @@ RULES:
   private localEngine(input: string): ChatMessage {
     const t = input.toLowerCase();
     const m = this.market.snapshot();
-    const hasPortfolio = this.userSvc.profile().profileComplete;
+    const hasPortfolio = this.portfolio.isReady();
     const user = this.userSvc.profile();
 
     let text: string;
@@ -324,7 +338,7 @@ With NIFTY ${m.nifty.pct >= 0 ? 'up' : 'down'} ${Math.abs(m.nifty.pct)}%, your e
           label: a.name,
           value: this.portfolio.formatCurrency(a.value),
           sub: `${a.change > 0 ? '+' : ''}${a.change}% MoM`,
-          color: a.name.includes('Equity') ? 'gold' as const : a.name.includes('Stock') ? 'blue' as const : 'green' as const,
+          color: (a.name.includes('Equity') ? 'gold' : a.name.includes('Stock') ? 'blue' : 'green') as any,
           action: 'detail',
         }));
         chips = [

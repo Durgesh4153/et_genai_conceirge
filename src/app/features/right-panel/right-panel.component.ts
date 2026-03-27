@@ -13,29 +13,37 @@ import { ChatService } from '../../services/chat.service';
       <!-- Net Worth -->
       <div class="panel-section">
         <div class="panel-title">Net Worth Overview</div>
-        <div class="wealth-card">
-          <div class="wealth-header">
-            <div>
-              <div class="wealth-total">{{ portfolio.formatCurrency(portfolio.portfolio().totalNetWorth) }}</div>
-              <div class="wealth-sub">+{{ portfolio.formatCurrency(portfolio.portfolio().monthlyChange) }} this month</div>
-            </div>
-            <div class="wealth-pct up">+{{ portfolio.portfolio().monthlyChangePct }}% MoM</div>
-          </div>
-          <div class="asset-rows">
-            @for (alloc of portfolio.portfolio().allocations; track alloc.name) {
-              <div class="asset-row" (click)="chat.sendMessage('Tell me about my ' + alloc.name + ' holdings')">
-                <span class="aname">{{ alloc.name }}</span>
-                <div class="abar-bg">
-                  <div class="abar-fill" [style.width.%]="alloc.percentage" [style.background]="alloc.color"></div>
-                </div>
-                <span class="apct">{{ alloc.percentage }}%</span>
-                <span class="achange" [class.up]="alloc.change > 0" [class.dn]="alloc.change < 0">
-                  {{ alloc.change > 0 ? '+' : '' }}{{ alloc.change }}%
-                </span>
+        @if (portfolio.isReady()) {
+          <div class="wealth-card">
+            <div class="wealth-header">
+              <div>
+                <div class="wealth-total">{{ portfolio.formatCurrency(portfolio.portfolio().totalNetWorth) }}</div>
+                <div class="wealth-sub">+{{ portfolio.formatCurrency(portfolio.portfolio().monthlyChange) }} this month</div>
               </div>
-            }
+              <div class="wealth-pct up">+{{ portfolio.portfolio().monthlyChangePct }}% MoM</div>
+            </div>
+            <div class="asset-rows">
+              @for (alloc of portfolio.portfolio().allocations; track alloc.name) {
+                <div class="asset-row" (click)="chat.sendMessage('Tell me about my ' + alloc.name + ' holdings')">
+                  <span class="aname">{{ alloc.name }}</span>
+                  <div class="abar-bg">
+                    <div class="abar-fill" [style.width.%]="alloc.percentage" [style.background]="alloc.color"></div>
+                  </div>
+                  <span class="apct">{{ alloc.percentage }}%</span>
+                  <span class="achange" [class.up]="alloc.change > 0" [class.dn]="alloc.change < 0">
+                    {{ alloc.change > 0 ? '+' : '' }}{{ alloc.change }}%
+                  </span>
+                </div>
+              }
+            </div>
           </div>
-        </div>
+        } @else {
+          <div class="wealth-card locked-card">
+            <div class="locked-icon">🔒</div>
+            <div class="locked-title">Portfolio Locked</div>
+            <div class="locked-sub">Complete your 3-minute profile to generate your personalised Net Worth view powered by ET Markets intelligence.</div>
+          </div>
+        }
       </div>
 
       <!-- Today's Opportunities -->
@@ -131,6 +139,12 @@ import { ChatService } from '../../services/chat.service';
     .achange { width: 34px; text-align: right; font-family: var(--font-mono); font-size: 10px; flex-shrink: 0; }
     .achange.up { color: var(--green); }
     .achange.dn { color: var(--red);   }
+
+    /* ── Locked / Empty state ── */
+    .locked-card { text-align: center; padding: 1.5rem 1rem !important; }
+    .locked-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.7; }
+    .locked-title { font-family: var(--font-display); font-size: 15px; color: var(--gold2); margin-bottom: 6px; }
+    .locked-sub { font-size: 11px; color: var(--text3); line-height: 1.6; }
 
     /* ── Opportunities ── */
     .opp-card {

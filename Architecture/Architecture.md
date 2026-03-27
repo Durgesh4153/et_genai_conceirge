@@ -1,44 +1,70 @@
-# ET Concierge System Architecture
+# ET Concierge — Architecture & Agent Orchestration
 
-## Overview
-ET Concierge v2 is an **Agentic Financial Intelligence layer** built on top of the Economic Times ecosystem. It uses a **Multi-Agent Orchestration** pattern to provide proactive, data-grounded financial advice.
+## High-Level System Architecture
 
-## Multi-Agent Workflow
+ET Concierge uses a **multi-agent, frontend-driven architecture** built on Angular 19, powered by Google's **Gemini 1.5 Flash**. By leveraging Angular Signals for reactive state management and a suite of specialized TypeScript-based logical agents, the system achieves real-time, low-latency intelligence.
+
 ```mermaid
 graph TD
-    A[User Query] --> B{Orchestrator}
-    B --> C[Profiling Agent]
-    B --> D[Navigator Agent]
-    B --> E[Opportunity Agent]
-    B --> F[Fulfilment Agent]
+    Client[Web Client - Angular 19]
+
+    subgraph State Management (Signals)
+        PS[Portfolio Service]
+        US[User Profile Service]
+        MS[Market Data Service]
+    end
+
+    subgraph Agentic Orchestration Layer
+        Chat[Chat Service - Router]
+        AgentProf[Profiling Agent]
+        AgentNav[Navigator Agent]
+        AgentOpp[Opportunity Agent]
+        AgentFulf[Fulfilment Agent]
+    end
+
+    subgraph External Intelligence
+        Gemini[Gemini 1.5 Flash API]
+        LiveFeed[Mock Live Market Feed]
+    end
+
+    Client -->|User Input| Chat
+    Chat -->|Route based on context| AgentNav
+    Chat -->|Evaluate Cross-sell| AgentOpp
+    Chat -->|Evaluate Action| AgentFulf
     
-    C -- Builds --> G[User Memory Model]
-    G -- Conditions --> D
-    D -- References --> H[Live ET Market Data]
-    E -- Monitors --> I[Contextual Triggers]
-    I -- Surfaces --> J[Partner Offers]
-    F -- Executes --> K[Action Task List]
+    AgentProf -->|Updates| US
+    US -->|Triggers creation| PS
+    
+    AgentNav -->|System Prompting| Gemini
+    AgentOpp -->|System Prompting| Gemini
+    
+    MS -->|Real-time Quotes| AgentNav
+    PS -->|Live Net Worth| AgentNav
+    
+    Gemini -->|Generates Insight Cards & Chips| Chat
+    Chat -->|Renders UI| Client
 ```
 
-## State Management
-To solve the problem of "forgetful AI," we implement a **Session History Buffer** and a **Persistent User Profile Service**:
+## Agent Roles & Responsibilities
 
-- **Behavioral Memory**: The `UserProfileService` stores the user's Discovery Score, Tier, and financial constraints (e.g., Retirement Gap of ₹29L).
-- **Conversational Context**: Every prompt sent to the Navigator Agent includes the latest state of the User Profile and Live Market Data as a flattened context header. This ensures the AI always "knows" what the Profiler learned 2 minutes ago.
-- **Agent Hand-off**: The Orchestrator (`ChatService`) evaluates the intent of every message. If the intent crosses a threshold (e.g., "apply"), the state is passed from the Navigator to the Fulfilment Agent to generate actionable steps.
+The system replaces a single monolithic chatbot with a **routing engine** that activates specialized agents:
 
-## Tool Integrations & Data Grounding
-To ensure high-fidelity financial advice, the agents leverage a multi-source integration layer:
-- **Yahoo Finance API**: Real-time market data for primary indices (NIFTY 50, SENSEX) and individual stock tickers.
-- **Google Search (Custom Search API)**: Deep-crawls the ET Prime and ET Markets ecosystem for news-based sentiment and wealth summit schedules.
-- **ET Partner Ecosystem**: Simulated hooks for HDFC (Loans), Axis (Credit Cards), and Mirae Asset (Mutual Funds) to demonstrate fulfilment capabilities.
+1. **Profiling Agent (The Onboarder)**
+   - **Role**: Greets users, executes the 3-minute financial profile survey, and determines the initial "Discovery Score."
+   - **Logic**: Uses deterministic logic to generate a realistic starting portfolio (e.g., ₹1.2Cr for wealth tier) instead of starting from zero.
 
-## Error-Handling & Resiliency
-The system is designed with a **"Fail-to-Local"** architecture:
-- **API Fallback**: If the Gemini API or Search API fails (quota limits or network issues), the system automatically triggers a **Local Rule Engine**. This engine uses a set of high-quality, profile-matched templates to ensure the user experience remains "agentic" and data-grounded without a hard failure.
-- **State Restoration**: If a session is interrupted, the `UserProfileService` persists the current "Discovery Score" and "Knowledge State," allowing the agents to resume context-heavy conversations smoothly.
+2. **Navigator Agent (The Core Brain)**
+   - **Role**: Answers broad financial queries, analyzes market trends, and contextualizes news against the user's specific portfolio.
+   - **Integration**: Injects real-time SENSEX/NIFTY data and current user net worth directly into the Gemini API system prompt at runtime, preventing hallucination.
 
-## Technical Debt & Scalability
-- **Real-time Hooks**: Current implementation uses a free-tier Yahoo Finance fallback. Future versions will integrate direct NSE/BSE API hooks for sub-second accuracy.
-- **SSO Integration**: The architecture is designed to connect to ET Prime's SSO for seamless user identification and premium content gating.
+3. **Opportunity Agent (The Cross-Sell Engine)**
+   - **Role**: Silently monitors the conversation for intent. If the user mentions "credit card," "loan," or "tax," it triggers a proactive cross-sell event.
+   - **Integration**: Injects "XSell Cards" (e.g., HDFC Home Loan, Axis Ace Card) into the chat stream and updates the Discovery Score in the sidebar.
 
+4. **Fulfilment Agent (The Closer)**
+   - **Role**: Converts advice into action. When the user agrees to proceed, it generates actionable steps (e.g., "Schedule callback," "Download application").
+
+## Error Handling & Fallback logic
+
+- **API Failure**: If the Gemini API is unreachable or times out, the `ChatService` employs a **Local Fallback Engine**. This engine isn't static text; it still pulls live market data from the `MarketService` and portfolio logic, ensuring the app remains fully functional and "alive" even when offline.
+- **Context Window Management**: The app maintains a rolling history of the last 12 messages to ensure context is maintained without exceeding token limits or driving up API costs.

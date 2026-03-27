@@ -14,7 +14,7 @@ import { AgentType, InsightCard, RecommendationChip, XSellItem, ActionItem } fro
     <section class="chat-wrap">
 
       <!-- ── Top Bar ── -->
-      <div class="chat-topbar">
+      <div class="chat-topbar glass">
         <div class="mode-tabs">
           @for (mode of modes; track mode) {
             <div class="mode-tab" [class.active]="chat.activeMode() === mode" (click)="chat.setMode(mode)">
@@ -23,7 +23,10 @@ import { AgentType, InsightCard, RecommendationChip, XSellItem, ActionItem } fro
           }
         </div>
         <div class="agent-indicator">
-          <div class="ai-dot" [class]="'dot-' + chat.activeAgent()"></div>
+          <div class="agent-pulse-wrap">
+            <div class="agent-pulse" [class]="'pulse-' + chat.activeAgent()"></div>
+            <div class="ai-dot" [class]="'dot-' + chat.activeAgent()"></div>
+          </div>
           <span class="ai-label">{{ agentLabel(chat.activeAgent()) }}</span>
         </div>
         <div class="context-pill">
@@ -38,7 +41,7 @@ import { AgentType, InsightCard, RecommendationChip, XSellItem, ActionItem } fro
           <div class="msg-row" [class.user]="msg.role === 'user'" [class.interrupt]="msg.interrupt">
             <!-- Avatar -->
             <div [class]="msg.role === 'ai' ? 'msg-avatar ai agent-' + msg.agent : 'msg-avatar user-av'">
-              {{ msg.role === 'ai' ? 'ET' : 'DN' }}
+              {{ msg.role === 'ai' ? 'D' : 'U' }}
             </div>
             <!-- Content -->
             <div class="msg-content" [class.user-content]="msg.role === 'user'">
@@ -48,7 +51,7 @@ import { AgentType, InsightCard, RecommendationChip, XSellItem, ActionItem } fro
                   <span class="msg-time">{{ msg.timestamp | date:'HH:mm' }}</span>
                 </div>
               }
-              <div class="msg-bubble" [class.user-bubble]="msg.role === 'user'" [class.interrupt-bubble]="msg.interrupt">
+              <div class="msg-bubble glass-low" [class.user-bubble]="msg.role === 'user'" [class.interrupt-bubble]="msg.interrupt">
                 <span [innerHTML]="msg.text"></span>
               </div>
 
@@ -124,21 +127,20 @@ import { AgentType, InsightCard, RecommendationChip, XSellItem, ActionItem } fro
         }
       </div>
 
-      <!-- ── ChatGPT-style Input ── -->
-      <div class="chat-input-area">
-        <div class="input-container">
+      <!-- ── Premium Input Area ── -->
+      <div class="chat-input-area glass">
+        <div class="input-container glow-gold">
           <textarea class="input-box" [(ngModel)]="inputText"
-            placeholder="Ask ET Concierge anything — markets, portfolio, tax, investments…"
+            placeholder="Ask Durgesh — markets, portfolio, tax, investments…"
             rows="1" (keydown.enter)="onEnter($event)" (input)="autoResize($event)">
           </textarea>
           <button class="send-btn" (click)="send()" [disabled]="chat.isTyping() || !inputText.trim()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"/>
             </svg>
           </button>
         </div>
-        <div class="input-hint">Powered by ET Concierge AI · Gemini · Live ET Markets Feed</div>
+        <div class="input-hint">ET Concierge Powered by Gemini 1.5 · Live NSE/BSE Feed via ET Markets</div>
       </div>
     </section>
   `,
@@ -146,10 +148,28 @@ import { AgentType, InsightCard, RecommendationChip, XSellItem, ActionItem } fro
     /* ── Layout ── */
     .chat-wrap { display:flex; flex-direction:column; height:100vh; background:var(--bg); }
 
+    /* ── Glassmorphism ── */
+    .glass {
+      background: rgba(15, 17, 21, 0.7) !important;
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    .glass-low {
+      background: rgba(22, 26, 32, 0.5) !important;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .glow-gold:focus-within {
+      box-shadow: 0 0 20px rgba(201, 168, 76, 0.15);
+      border-color: rgba(201, 168, 76, 0.4) !important;
+    }
+
     /* ── Top Bar ── */
     .chat-topbar {
-      flex-shrink:0; height:48px; display:flex; align-items:center; gap:10px;
+      flex-shrink:0; height:52px; display:flex; align-items:center; gap:10px;
       padding:0 1.25rem; background:var(--bg2); border-bottom:1px solid var(--border);
+      z-index: 10;
     }
     .mode-tabs { display:flex; gap:2px; }
     .mode-tab {
@@ -164,19 +184,25 @@ import { AgentType, InsightCard, RecommendationChip, XSellItem, ActionItem } fro
     }
     .mode-icon { font-size:11px; }
     .agent-indicator {
-      margin-left:auto; display:flex; align-items:center; gap:5px;
+      margin-left:auto; display:flex; align-items:center; gap:8px;
       font-size:10px; font-family:var(--font-mono); color:var(--text3);
     }
+    .agent-pulse-wrap { position: relative; width: 8px; height: 8px; display: flex; align-items: center; justify-content: center; }
     .ai-dot {
       width:6px; height:6px; border-radius:50%; background:#22c55e;
-      animation:pulse 2s infinite;
+      position: relative; z-index: 2;
     }
-    .dot-opportunity { background:var(--amber); }
-    .dot-fulfilment { background:var(--blue); }
+    .agent-pulse {
+      position: absolute; width: 6px; height: 6px; border-radius: 50%;
+      background: #22c55e; opacity: 0.6;
+      animation: agentPing 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    .dot-opportunity, .pulse-opportunity { background:var(--amber); }
+    .dot-fulfilment, .pulse-fulfilment { background:var(--blue); }
     .context-pill {
       font-size:9px; font-family:var(--font-mono); color:var(--text3);
-      background:var(--bg3); padding:3px 8px; border-radius:10px;
-      display:flex; align-items:center; gap:4px;
+      background:var(--bg3); padding:4px 10px; border-radius:12px;
+      display:flex; align-items:center; gap:6px;
       border:1px solid var(--border);
     }
     .ctx-dot { width:5px; height:5px; border-radius:50%; background:#22c55e; flex-shrink:0; }
@@ -403,8 +429,8 @@ export class ChatComponent implements AfterViewChecked, DoCheck {
   }
 
   agentLabel(type: AgentType | undefined): string {
-    const map: Record<string,string> = { navigator:'Navigator Agent', opportunity:'Opportunity Agent', fulfilment:'Fulfilment Agent', profiling:'Profiling Agent' };
-    return map[type ?? 'navigator'] ?? 'ET Concierge';
+    const map: Record<string,string> = { navigator:'Durgesh Navigator', opportunity:'Opportunity Agent', fulfilment:'Fulfilment Agent', profiling:'Profiling Agent' };
+    return map[type ?? 'navigator'] ?? 'Durgesh - ET Concierge';
   }
 
   modeIcon(mode: string): string {
