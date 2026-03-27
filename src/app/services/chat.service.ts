@@ -8,7 +8,7 @@ import { PortfolioService } from './portfolio.service';
 @Injectable({ providedIn: 'root' })
 export class ChatService {
 
-  // ── Injected agents ────────────────────────────────────────────────────────
+  // ── Injected services ─────────────────────────────────────────────────────
   private gemini    = inject(GeminiService);
   private market    = inject(MarketService);
   private userSvc   = inject(UserProfileService);
@@ -23,7 +23,7 @@ export class ChatService {
 
   readonly quickPrompts = [
     'Show my portfolio snapshot',
-    'How do I close my retirement gap?',
+    'How are the markets doing today?',
     'Best tax-saving options for FY26',
     'Compare home loan rates',
     'What events should I attend?',
@@ -32,93 +32,123 @@ export class ChatService {
   private msgCounter = 0;
   private mkId(): string { return `msg-${++this.msgCounter}`; }
 
-  // ── Gemini system prompt ───────────────────────────────────────────────────
+  // ── Gemini system prompt — FULLY DYNAMIC ──────────────────────────────────
   private buildSystemPrompt(): string {
-    return `You are the ET Concierge — a premium agentic AI financial intelligence layer for Economic Times, India's leading financial media platform.
+    const m = this.market.snapshot();
+    const p = this.portfolio.portfolio();
+    const user = this.userSvc.profile();
+    const hasPortfolio = this.userSvc.profile().profileComplete;
 
-USER PROFILE:
-${this.userSvc.buildContextSummary()}
+    const portfolioBlock = hasPortfolio
+      ? `REAL-TIME PORTFOLIO (LIVE):
+- Total Net Worth: ${this.portfolio.formatCurrency(p.totalNetWorth)}
+- Monthly Change: ${this.portfolio.formatCurrency(p.monthlyChange)} (${p.monthlyChangePct}% MoM)
+- Allocations: ${p.allocations.map(a => `${a.name}: ${a.percentage}% (${this.portfolio.formatCurrency(a.value)}, ${a.change > 0 ? '+' : ''}${a.change}%)`).join(' | ')}`
+      : `PORTFOLIO: User has not yet completed profiling. Encourage them to complete their 3-minute profile.`;
 
-MARKET CONTEXT:
-${this.market.getMarketContext()}
+    return `You are ET Concierge — a premium AI financial intelligence engine by Economic Times.
+You combine the analytical depth of a Bloomberg terminal with the warmth of a private wealth manager.
 
-YOUR 4 AGENT ROLES:
-1. Profiling Agent — builds user financial identity, personalises all responses
-2. Navigator Agent — delivers data-rich financial briefings, references live ET Markets data
-3. Opportunity Agent — surfaces contextual cross-sell (ET Prime, ET Markets, ET Financial Services, ET Events)
-4. Fulfilment Agent — simulates completing actions (applying, registering, initiating SIPs)
+PERSONALITY:
+- Speak like a knowledgeable friend who happens to be a top financial advisor.
+- Be specific: use ₹ amounts, fund names, SENSEX/NIFTY numbers, percentage returns.
+- Be concise — under 75 words. Every word must earn its place.
+- ALWAYS end with a strategic question or choice for the user.
 
-ET ECOSYSTEM YOU REPRESENT:
-- ET Prime (premium content), ET Markets (stocks, MFs, portfolio), ET Masterclasses (education)
-- ET Wealth Summit & Events, ET Financial Services (credit cards, loans, insurance, wealth mgmt via HDFC, Axis, Mirae Asset, Motilal Oswal)
+USER:
+- Name: ${user.name}
+- Goal: ${user.goal ?? 'Not yet specified'}
+- Horizon: ${user.horizon ?? 'Not specified'}
+- Income: ₹${(user.annualIncome / 100000).toFixed(0)}L/yr
+- Monthly Investable: ₹${(user.monthlyInvestable / 1000).toFixed(0)}K
+- Discovery Score: ${user.discoveryScore}/100
 
-RESPONSE RULES:
-- Be precise, data-rich, Bloomberg-terminal meets private-banker energy
-- Always use ₹ for Indian Rupee. Give specific numbers, fund names, rates
-- Keep responses under 80 words — concise but punchy
-- Naturally mention relevant ET products/services when they fit (not forced)
-- **CRITICAL**: Always end your response with a clear question or a choice for the user to make (e.g. "Should we look at X or Y first?")
-- **FORMATTING**: Use HTML bolding (<strong>) for numbers and key terms. Use bullet points for scannability.
-- Never say "I'm an AI" or "as a language model"`;
+${portfolioBlock}
+
+LIVE MARKET DATA (refresh every 15s):
+- SENSEX: ${m.sensex.value.toLocaleString()} (${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%)
+- NIFTY: ${m.nifty.value.toLocaleString()} (${m.nifty.pct >= 0 ? '+' : ''}${m.nifty.pct}%)
+- Gold: ₹${m.gold.value.toLocaleString()}/10g (${m.gold.pct >= 0 ? '+' : ''}${m.gold.pct}%)
+- USD/INR: ${m.usdinr.value}
+
+RULES:
+- Use <strong> HTML tags for emphasis. Use bullet points.
+- Reference SENSEX/NIFTY data when discussing markets or portfolio strategy.
+- Reference the user's actual portfolio numbers when discussing their wealth.
+- Never say "I'm an AI" — you are ET Concierge.
+- Never give generic advice — always tie recommendations to the user's specific profile.`;
   }
 
-  // ── Initialise with Navigator Agent briefing ───────────────────────────────
+  // ── Initialise ────────────────────────────────────────────────────────────
   constructor() {
     setTimeout(() => this.loadInitialMessages(), 300);
   }
 
   private loadInitialMessages(): void {
-    const greetingInsights: InsightCard[] = [
-      { label: 'Portfolio Value',     value: '₹62.4L',  sub: '+5.2% this month',    color: 'gold',  action: 'portfolio' },
-      { label: 'Retirement Gap',      value: '₹29L',    sub: 'vs ₹3.2Cr target',    color: 'red',   action: 'gap'       },
-      { label: 'Matched Ops Today',   value: '4 found', sub: 'Cards, loans, events', color: 'blue',  action: 'opps'      },
-      { label: 'Discovery Score',     value: '68/100',  sub: '+15 pts available',    color: 'green', action: 'discovery' },
-    ];
+    const m = this.market.snapshot();
+    const user = this.userSvc.profile();
+    const hasPortfolio = this.userSvc.profile().profileComplete;
 
-    const xsellItems: XSellItem[] = [
-      { icon: '💳', title: 'Axis Ace Card — Pre-approved for you',    subtitle: 'CIBIL 786 · 2% cashback · No hard inquiry',   prompt: 'Tell me about Axis Ace credit card pre-approval', tag: 'SERVICE' },
-      { icon: '📅', title: 'ET Wealth Summit — Mar 28 (3 days away)', subtitle: 'Nilesh Shah keynote · Included in Prime plan', prompt: 'Register me for ET Wealth Summit',                tag: 'EVENT'   },
-    ];
+    const sensexDir = m.sensex.pct >= 0 ? 'up' : 'down';
+    const sensexColor = m.sensex.pct >= 0 ? 'green' : 'red';
+    const niftyDir = m.nifty.pct >= 0 ? 'up' : 'down';
 
-    const chips: RecommendationChip[] = [
-      { label: '📉 Fix my Retirement Gap', highlight: true,  prompt: 'How do I close my retirement gap?' },
-      { label: '💸 Optimize FY26 Tax', highlight: false, prompt: 'Show me my tax saving plan for FY26' },
-      { label: '💎 View ET Markets Picks', highlight: false, prompt: 'Give me ET Markets top mutual fund picks' },
-      { label: '🛡️ Check Insurance Gaps', highlight: false, prompt: 'Do an insurance audit for me' },
-    ];
+    let greetingText: string;
+    let greetingInsights: InsightCard[];
 
-    this.messages.set([
-      {
-        id:       this.mkId(),
-        role:     'ai',
-        agent:    'navigator',
-        timestamp: new Date(),
-        text:     `Good morning, <strong class="text-gold">Durgesh </strong>. Markets are up — NIFTY +0.74%. Your portfolio outperformed by 1.2% this month. The most urgent item is a <strong class="text-red">₹29L retirement gap</strong> that needs a strategy shift. <strong class="text-gold">Should we start there, or would you like to see your tax-saving picks for FY26 first?</strong>`,
-        insights: greetingInsights,
-        chips,
-      },
-      {
-        id:        this.mkId(),
-        role:      'ai',
-        agent:     'opportunity',
-        timestamp: new Date(),
-        text:      `<strong class="text-gold">Opportunity Agent</strong> → I've flagged two urgent items: Your legacy LIC policy is underperforming compared to the market, and there's an ET Wealth Summit happening in 3 days that covers exactly your portfolio needs. <strong class="text-gold">Want the details?</strong>`,
-        xsellItems,
-      },
-    ]);
+    if (hasPortfolio) {
+      const p = this.portfolio.portfolio();
+      greetingText = `Good evening, <strong class="text-gold">${user.name.split(' ')[0]}</strong>. Markets are ${sensexDir} today — <strong class="text-${sensexColor}">SENSEX ${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%</strong> at ${m.sensex.value.toLocaleString()}. Your portfolio is at <strong class="text-gold">${this.portfolio.formatCurrency(p.totalNetWorth)}</strong>, ${p.monthlyChangePct > 0 ? 'up' : 'flat'} ${p.monthlyChangePct}% this month. <strong class="text-gold">Where should we focus — portfolio review, tax strategy, or market opportunities?</strong>`;
+      greetingInsights = [
+        { label: 'Net Worth', value: this.portfolio.formatCurrency(p.totalNetWorth), sub: `+${p.monthlyChangePct}% MoM`, color: 'gold', action: 'portfolio' },
+        { label: 'SENSEX', value: `${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%`, sub: `at ${m.sensex.value.toLocaleString()}`, color: m.sensex.pct >= 0 ? 'green' : 'red', action: 'markets' },
+        { label: 'NIFTY', value: `${m.nifty.pct >= 0 ? '+' : ''}${m.nifty.pct}%`, sub: `at ${m.nifty.value.toLocaleString()}`, color: m.nifty.pct >= 0 ? 'green' : 'red', action: 'markets' },
+        { label: 'Gold', value: `₹${m.gold.value.toLocaleString()}`, sub: `${m.gold.pct >= 0 ? '+' : ''}${m.gold.pct}%`, color: 'gold', action: 'gold' },
+      ];
+    } else {
+      greetingText = `Welcome to <strong class="text-gold">ET Concierge</strong>, ${user.name.split(' ')[0]}! I'm your personal financial intelligence layer, powered by Economic Times. Markets are ${sensexDir} — <strong class="text-${sensexColor}">SENSEX ${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%</strong>. Complete your quick profile and I'll unlock personalised portfolio insights. <strong class="text-gold">Ask me anything about markets, investments, or tax strategy!</strong>`;
+      greetingInsights = [
+        { label: 'SENSEX', value: `${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%`, sub: `at ${m.sensex.value.toLocaleString()}`, color: m.sensex.pct >= 0 ? 'green' : 'red', action: 'markets' },
+        { label: 'NIFTY', value: `${m.nifty.pct >= 0 ? '+' : ''}${m.nifty.pct}%`, sub: `at ${m.nifty.value.toLocaleString()}`, color: m.nifty.pct >= 0 ? 'green' : 'red', action: 'markets' },
+        { label: 'Gold', value: `₹${m.gold.value.toLocaleString()}`, sub: `${m.gold.pct >= 0 ? '+' : ''}${m.gold.pct}%`, color: 'gold', action: 'gold' },
+        { label: 'USD/INR', value: `₹${m.usdinr.value}`, sub: `${m.usdinr.pct >= 0 ? '+' : ''}${m.usdinr.pct}%`, color: 'blue', action: 'forex' },
+      ];
+    }
+
+    const chips: RecommendationChip[] = hasPortfolio
+      ? [
+          { label: '📊 Portfolio Snapshot', highlight: true, prompt: 'Show my portfolio snapshot' },
+          { label: '📈 Market Pulse', highlight: false, prompt: 'How are the markets today?' },
+          { label: '💰 Tax Strategy', highlight: false, prompt: 'What is my FY26 tax saving plan?' },
+          { label: '🎯 Financial Goals', highlight: false, prompt: 'What should I prioritize for my financial goals?' },
+        ]
+      : [
+          { label: '📈 Market Update', highlight: true, prompt: 'How are the markets today?' },
+          { label: '💡 Investment Ideas', highlight: false, prompt: 'What are the best investment options right now?' },
+          { label: '📰 ET Prime Picks', highlight: false, prompt: 'What is trending on ET Prime today?' },
+        ];
+
+    this.messages.set([{
+      id:        this.mkId(),
+      role:      'ai',
+      agent:     'navigator',
+      timestamp: new Date(),
+      text:      greetingText,
+      insights:  greetingInsights,
+      chips,
+    }]);
   }
 
-  // ── Main send ──────────────────────────────────────────────────────────────
+  // ── Main send ────────────────────────────────────────────────────────────
   async sendMessage(text: string): Promise<void> {
     if (!text.trim()) return;
 
-    // Add user message
     this.messages.update(msgs => [
       ...msgs,
       { id: this.mkId(), role: 'user', timestamp: new Date(), text },
     ]);
 
-    // ── Opportunity Agent: keyword interrupt check ──────────────────────────
+    // Opportunity Agent: keyword interrupt check
     const opportunityMatch = this.portfolio.getOpportunityByKeyword(text);
     const lastMsgs = this.messages();
     const alreadyInterrupted = lastMsgs
@@ -130,13 +160,13 @@ RESPONSE RULES:
       this.injectOpportunityInterrupt(opportunityMatch);
     }
 
-    // ── Navigator Agent: main response ────────────────────────────────────
+    // Navigator Agent: main response
     this.isTyping.set(true);
     this.activeAgent.set('navigator');
 
     let reply: ChatMessage;
 
-    // Try Gemini first (free API)
+    // Try Gemini first
     const geminiHistory = this.gemini.buildHistory(
       this.messages().slice(-12).map(m => ({ role: m.role, text: m.text }))
     );
@@ -147,10 +177,8 @@ RESPONSE RULES:
     );
 
     if (geminiResponse) {
-      // Gemini responded — wrap it with chips
       reply = this.wrapGeminiResponse(geminiResponse, text);
     } else {
-      // Local engine fallback
       reply = this.localEngine(text);
     }
 
@@ -158,14 +186,14 @@ RESPONSE RULES:
     this.isTyping.set(false);
     this.messages.update(msgs => [...msgs, reply]);
 
-    // ── Fulfilment Agent: action offer after certain intents ───────────────
+    // Fulfilment Agent: action offer after certain intents
     if (this.shouldOfferAction(text)) {
       await this.delay(1200);
       this.injectFulfilmentAction(text);
     }
   }
 
-  // ── Opportunity Agent interrupt (proactive, unsolicited) ──────────────────
+  // ── Opportunity Agent interrupt ────────────────────────────────────────────
   private injectOpportunityInterrupt(opp: ReturnType<typeof this.portfolio.getOpportunityByKeyword>): void {
     if (!opp) return;
     this.activeAgent.set('opportunity');
@@ -187,7 +215,7 @@ RESPONSE RULES:
     this.messages.update(msgs => [...msgs, msg]);
   }
 
-  // ── Fulfilment Agent action injection ─────────────────────────────────────
+  // ── Fulfilment Agent ──────────────────────────────────────────────────────
   private shouldOfferAction(text: string): boolean {
     const t = text.toLowerCase();
     return ['apply', 'register', 'invest', 'start sip', 'open', 'book', 'enrol', 'increase sip'].some(kw => t.includes(kw));
@@ -196,7 +224,6 @@ RESPONSE RULES:
   private injectFulfilmentAction(trigger: string): void {
     this.activeAgent.set('fulfilment');
     const t = trigger.toLowerCase();
-
     let actions: ActionItem[] = [];
 
     if (t.includes('sip') || t.includes('invest') || t.includes('fund')) {
@@ -235,7 +262,7 @@ RESPONSE RULES:
     this.messages.update(msgs => [...msgs, msg]);
   }
 
-  // ── Wrap Gemini response with contextual chips ─────────────────────────────
+  // ── Wrap Gemini response ──────────────────────────────────────────────────
   private wrapGeminiResponse(text: string, trigger: string): ChatMessage {
     const chips = this.getContextualChips(trigger);
     return {
@@ -248,153 +275,142 @@ RESPONSE RULES:
     };
   }
 
-  // ── Local engine — rich fallback (no API needed) ───────────────────────────
+  // ── LOCAL ENGINE — Fully Dynamic, No Hardcoded Values ─────────────────────
   private localEngine(input: string): ChatMessage {
     const t = input.toLowerCase();
+    const m = this.market.snapshot();
+    const hasPortfolio = this.userSvc.profile().profileComplete;
+    const user = this.userSvc.profile();
+
     let text: string;
     let chips: RecommendationChip[] | undefined;
     let insights: InsightCard[] | undefined;
 
-    if (t.includes('portfolio') || t.includes('net worth') || t.includes('allocation') || t.includes('holding')) {
-      text = `Your <strong class="text-gold">₹62.4L net worth</strong> is spread across 4 asset classes:
-- <strong class="text-gold">Equity MFs</strong>: Leading at +2.4% MoM.
-- <strong class="text-red">Legacy LIC</strong>: Real return of 4.2% — this is "dead weight".
-I recommend surrendering the LIC policy and redirecting to a High-Growth Flexi Cap. <strong class="text-gold">Should we run a comparison against NIFTY 50 first?</strong>`;
+    // ── MARKET queries ────────────────────────────────────────────────────
+    if (t.includes('market') || t.includes('sensex') || t.includes('nifty') || t.includes('how are') || t.includes('today')) {
+      const sensexDir = m.sensex.pct >= 0 ? 'up' : 'down';
+      const niftyDir = m.nifty.pct >= 0 ? 'up' : 'down';
+      text = `<strong class="text-gold">Live Market Pulse</strong>:
+- <strong>SENSEX</strong>: ${sensexDir} <strong class="text-${m.sensex.pct >= 0 ? 'green' : 'red'}">${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%</strong> at ${m.sensex.value.toLocaleString()}
+- <strong>NIFTY</strong>: ${niftyDir} <strong class="text-${m.nifty.pct >= 0 ? 'green' : 'red'}">${m.nifty.pct >= 0 ? '+' : ''}${m.nifty.pct}%</strong> at ${m.nifty.value.toLocaleString()}
+- <strong>Gold</strong>: ₹${m.gold.value.toLocaleString()}/10g (${m.gold.pct >= 0 ? '+' : ''}${m.gold.pct}%)
+${hasPortfolio ? `Your equity-heavy portfolio is likely ${m.nifty.pct >= 0 ? 'benefiting from' : 'impacted by'} this move.` : ''}
+<strong class="text-gold">Want me to analyse how this impacts your investments?</strong>`;
       insights = [
-        { label: 'Equity MFs',    value: '₹34.3L', sub: '+2.4% this month', color: 'gold',  action: 'equity' },
-        { label: 'Direct Stocks', value: '₹11.2L', sub: '+1.8% this month', color: 'blue',  action: 'stocks' },
-        { label: 'FD / Debt',     value: '₹9.4L',  sub: '+0.6% (FD rate)',  color: 'green', action: 'debt'   },
-        { label: 'Gold / RE',     value: '₹7.5L',  sub: '+0.3% this month', color: 'gold',  action: 'gold'   },
+        { label: 'SENSEX', value: `${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%`, sub: m.sensex.value.toLocaleString(), color: m.sensex.pct >= 0 ? 'green' : 'red', action: 'markets' },
+        { label: 'NIFTY', value: `${m.nifty.pct >= 0 ? '+' : ''}${m.nifty.pct}%`, sub: m.nifty.value.toLocaleString(), color: m.nifty.pct >= 0 ? 'green' : 'red', action: 'markets' },
+        { label: 'Gold', value: `₹${m.gold.value.toLocaleString()}`, sub: `${m.gold.pct >= 0 ? '+' : ''}${m.gold.pct}%`, color: 'gold', action: 'gold' },
       ];
       chips = [
-        { label: 'Surrender LIC & reinvest',  highlight: true,  prompt: 'Should I surrender my LIC endowment and reinvest?' },
-        { label: 'Compare to NIFTY',          highlight: false, prompt: 'How does my portfolio compare to NIFTY 50 returns?' },
-        { label: 'Rebalancing strategy',      highlight: false, prompt: 'Give me a rebalancing strategy for my portfolio' },
+        { label: '📊 Impact on my portfolio', highlight: true,  prompt: 'How does today\'s market move affect my portfolio?' },
+        { label: '📈 Top movers on ET Markets', highlight: false, prompt: 'Show me top stock movers from ET Markets today' },
       ];
 
+    // ── PORTFOLIO queries ─────────────────────────────────────────────────
+    } else if (t.includes('portfolio') || t.includes('net worth') || t.includes('allocation') || t.includes('holding') || t.includes('wealth')) {
+      if (!hasPortfolio) {
+        text = `Your portfolio isn't set up yet! Complete your <strong class="text-gold">3-minute profile</strong> and I'll generate a personalised Net Worth view with asset allocation insights powered by ET Markets data. <strong class="text-gold">Would you like to start your profile now?</strong>`;
+        chips = [
+          { label: '🚀 Start Profile', highlight: true, prompt: 'I want to complete my profile' },
+          { label: '📈 Show Markets', highlight: false, prompt: 'How are the markets today?' },
+        ];
+      } else {
+        const p = this.portfolio.portfolio();
+        const nw = this.portfolio.formatCurrency(p.totalNetWorth);
+        text = `<strong class="text-gold">${nw}</strong> — here's your breakdown:
+${p.allocations.map(a => `- <strong>${a.name}</strong>: ${a.percentage}% (${this.portfolio.formatCurrency(a.value)}) · ${a.change > 0 ? '+' : ''}${a.change}% MoM`).join('\n')}
+With NIFTY ${m.nifty.pct >= 0 ? 'up' : 'down'} ${Math.abs(m.nifty.pct)}%, your equity allocation is ${m.nifty.pct >= 0 ? 'capturing upside' : 'under pressure'}. <strong class="text-gold">Should we optimise your allocation or explore tax-saving options?</strong>`;
+        insights = p.allocations.map(a => ({
+          label: a.name,
+          value: this.portfolio.formatCurrency(a.value),
+          sub: `${a.change > 0 ? '+' : ''}${a.change}% MoM`,
+          color: a.name.includes('Equity') ? 'gold' as const : a.name.includes('Stock') ? 'blue' as const : 'green' as const,
+          action: 'detail',
+        }));
+        chips = [
+          { label: '🔄 Rebalance strategy', highlight: true, prompt: 'Give me a rebalancing strategy for my portfolio' },
+          { label: '📊 Compare to NIFTY', highlight: false, prompt: 'How does my portfolio compare to NIFTY 50?' },
+          { label: '💰 Tax saving plays', highlight: false, prompt: 'Best tax-saving investments for FY26' },
+        ];
+      }
+
+    // ── RETIREMENT / GAP queries ──────────────────────────────────────────
     } else if (t.includes('retirement') || t.includes('retire') || t.includes('corpus') || t.includes('gap')) {
-      text = `Retirement goal: <strong class="text-gold">₹3.2 Cr by 2037</strong>. Current gap: <strong class="text-red">₹29L</strong>.
-Three key levers:
-- <strong class="text-gold">SIP Step-up</strong>: +₹5K/mo closes 60% of gap.
-- <strong class="text-gold">NPS Top-up</strong>: Closes another 25%.
-- <strong class="text-gold">Mid-cap Tilt</strong>: Targeted alpha generation.
-<strong class="text-gold">Which lever should we pull first to secure your 2037 target?</strong>`;
+      if (!hasPortfolio) {
+        text = `I'd love to calculate your retirement gap, but I need your portfolio data first. <strong class="text-gold">Complete your profile to unlock personalised retirement planning.</strong>`;
+        chips = [{ label: '🚀 Start Profile', highlight: true, prompt: 'I want to complete my profile' }];
+      } else {
+        const p = this.portfolio.portfolio();
+        const target = user.annualIncome * 15;
+        const gap = Math.max(0, target - p.totalNetWorth);
+        text = `Retirement target: <strong class="text-gold">${this.portfolio.formatCurrency(target)}</strong> (15× annual income). Current gap: <strong class="text-red">${this.portfolio.formatCurrency(gap)}</strong>.
+Key levers:
+- <strong class="text-gold">SIP Step-up</strong>: +₹${Math.floor(user.monthlyInvestable * 0.1).toLocaleString()}/mo
+- <strong class="text-gold">NPS 80CCD(1B)</strong>: Extra ₹50K tax benefit
+- <strong class="text-gold">Equity tilt</strong>: Increase exposure while NIFTY is ${m.nifty.pct >= 0 ? 'bullish' : 'at a discount'}
+<strong class="text-gold">Which lever should we pull first?</strong>`;
+        chips = [
+          { label: '↑ SIP Step-up', highlight: true, prompt: 'How do I increase my SIP for retirement?' },
+          { label: 'Open NPS', highlight: false, prompt: 'How does NPS help close my retirement gap?' },
+          { label: 'Equity rebalance', highlight: false, prompt: 'Should I increase my equity allocation?' },
+        ];
+      }
+
+    // ── TAX queries ───────────────────────────────────────────────────────
+    } else if (t.includes('tax') || t.includes('80c') || t.includes('elss') || t.includes('deduction') || t.includes('fy26')) {
+      const unused80c = Math.max(0, 150000 - Math.floor(user.monthlyInvestable * 0.2));
+      text = `<strong class="text-gold">FY26 Tax Intelligence</strong>:
+- <strong>80C remaining</strong>: ₹${unused80c.toLocaleString()} → saves ~₹${Math.floor(unused80c * 0.3).toLocaleString()} in tax
+- <strong>NPS 80CCD(1B)</strong>: Extra ₹50K → saves ₹15,600
+- <strong>Best ELSS</strong>: Quant Tax Plan (30.2% 3Y CAGR via ET Markets)
+${hasPortfolio ? `Your ${this.portfolio.portfolio().allocations[0]?.name} allocation already provides some tax efficiency.` : ''}
+<strong class="text-gold">Should I create your complete FY26 tax roadmap?</strong>`;
       chips = [
-        { label: '↑ SIP by ₹5K/month',   highlight: true,  prompt: 'How do I increase my SIP by 5000 per month to a new fund?' },
-        { label: 'Open NPS account',      highlight: false, prompt: 'How does NPS help close my retirement gap?' },
-        { label: 'Mid-cap rebalance',     highlight: false, prompt: 'Which mid-cap funds should I add for retirement?' },
-        { label: 'Full projection view',  highlight: false, prompt: 'Show me my retirement corpus projection year by year' },
+        { label: '💎 Invest in ELSS', highlight: true, prompt: 'How do I invest in Quant Tax Plan ELSS?' },
+        { label: '🏦 Open NPS', highlight: false, prompt: 'How to maximise NPS tax deduction?' },
+        { label: '📋 Full tax plan', highlight: false, prompt: 'Create a complete FY26 tax saving plan' },
       ];
 
-    } else if (t.includes('tax') || t.includes('80c') || t.includes('elss') || t.includes('deduction') || t.includes('fy26') || t.includes('fy 26')) {
-      text = `FY26 Tax Snapshot: <strong class="text-gold">₹88,500 of 80C unused</strong>.
-- <strong class="text-gold">Max 80C</strong>: Save ₹24,000 in tax.
-- <strong class="text-gold">NPS 80CCD</strong>: Save an extra ₹15,600.
-Best ELSS: <strong class="text-gold">Quant Tax Plan</strong> (30.2% 3Y CAGR).
-<strong class="text-gold">Would you like me to create a complete FY26 tax saving roadmap for you?</strong>`;
+    // ── INSURANCE queries ─────────────────────────────────────────────────
+    } else if (t.includes('insurance') || t.includes('term plan') || t.includes('life cover') || t.includes('health')) {
+      const idealCover = user.annualIncome * 10;
+      text = `<strong class="text-gold">Insurance Gap Analysis</strong>:
+- <strong class="text-red">Life cover needed</strong>: ${this.portfolio.formatCurrency(idealCover)} (10× income)
+- <strong>Best term plan</strong>: HDFC Click2Protect ₹1Cr at ~₹14,200/yr
+- <strong>Health cover</strong>: ₹10L family floater recommended (Star Comprehensive ~₹18K/yr)
+<strong class="text-gold">Should I generate quotes from ET Financial Services partners?</strong>`;
       chips = [
-        { label: 'Invest in Quant Tax Plan', highlight: true,  prompt: 'How do I invest in Quant Tax Plan ELSS?' },
-        { label: 'Open NPS for 80CCD',       highlight: false, prompt: 'How much tax do I save with NPS 80CCD 1B?' },
-        { label: 'HRA optimisation',         highlight: false, prompt: 'How can I optimise my HRA claim?' },
-        { label: 'Full FY26 tax plan',       highlight: false, prompt: 'Create a complete FY26 tax saving plan for me' },
+        { label: '🛡️ Get term cover', highlight: true, prompt: 'Apply for HDFC Click2Protect term plan' },
+        { label: '🏥 Health cover', highlight: false, prompt: 'Compare health insurance plans' },
       ];
 
-    } else if (t.includes('nps') || t.includes('national pension')) {
-      text = 'NPS: <strong class="text-gold">₹1.5L under 80C + ₹50K extra 80CCD(1B)</strong>. At your 30% bracket, that\'s ₹15,600 tax saved annually. 60% of corpus tax-free at maturity. Tier I lock-in until 60. Best allocation: 75% equity (Tier I) now, shift to hybrid after 50.';
+    // ── GREETING ──────────────────────────────────────────────────────────
+    } else if (t.match(/^(hi|hello|hey|good\s*(morning|evening|afternoon))[\s!.]*$/i)) {
+      const sensexDir = m.sensex.pct >= 0 ? 'up' : 'down';
+      text = `Welcome back, <strong class="text-gold">${user.name.split(' ')[0]}</strong>! SENSEX is ${sensexDir} <strong class="text-${m.sensex.pct >= 0 ? 'green' : 'red'}">${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%</strong> today. ${hasPortfolio ? `Your portfolio stands at <strong class="text-gold">${this.portfolio.formatCurrency(this.portfolio.portfolio().totalNetWorth)}</strong>.` : 'Complete your profile to unlock personalised insights.'} <strong class="text-gold">What would you like to explore — markets, investments, or tax strategy?</strong>`;
       chips = [
-        { label: 'Open NPS (HDFC Pension)', highlight: true,  prompt: 'How to open NPS account with HDFC Pension?' },
-        { label: 'NPS vs ELSS vs PPF',      highlight: false, prompt: 'Compare NPS ELSS and PPF for my profile' },
+        { label: '📊 Portfolio', highlight: hasPortfolio, prompt: 'Show my portfolio snapshot' },
+        { label: '📈 Markets', highlight: !hasPortfolio, prompt: 'How are the markets today?' },
+        { label: '💰 Tax', highlight: false, prompt: 'Best tax-saving options for FY26' },
       ];
 
-    } else if (t.includes('sip') || t.includes('systematic investment')) {
-      text = 'Current SIPs: ₹25,000/month across 3 funds. To close retirement gap, add <strong class="text-gold">Parag Parikh Flexi Cap at ₹5,000/month</strong> — 18.4% 5Y CAGR, global diversification, zero overlap with existing holdings. Returns projection: ₹8.7L in 7 years.';
-      chips = [
-        { label: 'Start Parag Parikh SIP',  highlight: true,  prompt: 'Start SIP in Parag Parikh Flexi Cap fund for 5000 per month' },
-        { label: 'Compare flexi-cap funds', highlight: false, prompt: 'Compare top flexi cap mutual funds India 2025' },
-        { label: 'SIP projection calc',     highlight: false, prompt: 'Calculate my SIP corpus at 15 percent for 10 years' },
-      ];
-
-    } else if (t.includes('credit card') || t.includes('axis ace') || t.includes('cashback card')) {
-      text = 'Pre-approved via ET: <strong class="text-gold">Axis Ace (CIBIL 786 → instant)</strong>. 2% flat cashback, ₹500 Amazon voucher on activation, no first-year fee, no hard pull on credit report. Limit likely ₹3–5L based on income. Second best: HDFC Regalia (lounge + rewards).';
-      chips = [
-        { label: 'Apply Axis Ace (no hard pull)', highlight: true,  prompt: 'Apply for Axis Ace credit card via ET now' },
-        { label: 'Compare all matched cards',     highlight: false, prompt: 'Show all 4 credit cards matched to my profile' },
-        { label: 'HDFC Regalia alternative',      highlight: false, prompt: 'Tell me about HDFC Regalia credit card benefits' },
-      ];
-
-    } else if (t.includes('home loan') || t.includes('housing loan') || t.includes('property loan') || t.includes('home purchase')) {
-      text = 'ET pre-negotiated HDFC rate: <strong class="text-gold">8.35%</strong> (market: 8.65%). On ₹60L / 20 years → EMI ₹51,800, interest saving vs market rate = <strong class="text-green">₹2.8L over tenure</strong>. Your salary-to-EMI ratio is healthy at 28.7%. In-principle approval: instant.';
-      chips = [
-        { label: 'Get in-principle letter (HDFC)', highlight: true,  prompt: 'Generate HDFC home loan in principle approval letter' },
-        { label: 'Compare all lenders',            highlight: false, prompt: 'Compare home loan rates SBI HDFC ICICI Kotak 2025' },
-        { label: 'EMI stress test',                highlight: false, prompt: 'What if interest rates rise to 9.5 percent on my loan?' },
-      ];
-
-    } else if (t.includes('insurance') || t.includes('term plan') || t.includes('life cover') || t.includes('health cover')) {
-      text = 'Gaps detected: <strong class="text-red">Life cover ₹25L (need ₹1.8Cr at 10x income)</strong>, health cover ₹3L employer (need ₹10L family floater). Best term: HDFC Click2Protect ₹1Cr at ₹14,200/year. Best health: Star Comprehensive at ₹18,000/year, OPD included.';
-      chips = [
-        { label: 'Get ₹1Cr term cover',   highlight: true,  prompt: 'Apply for HDFC Click2Protect 1 crore term plan' },
-        { label: 'Get ₹10L health cover', highlight: false, prompt: 'Apply for Star Health 10 lakh family floater' },
-        { label: 'Full insurance audit',  highlight: false, prompt: 'Do a complete insurance needs analysis for me' },
-      ];
-
-    } else if (t.includes('gold') || t.includes('sgb') || t.includes('sovereign')) {
-      text = 'Gold at <strong class="text-gold">₹72,410/10g (+0.3% today)</strong>. Your 12% gold allocation is slightly high — optimal is 8–10%. Sovereign Gold Bonds (SGB) give gold returns + 2.5% annual interest, tax-free on maturity. Next SGB tranche: April 2025.';
-      chips = [
-        { label: 'Invest in next SGB tranche', highlight: true,  prompt: 'How to invest in Sovereign Gold Bonds next tranche?' },
-        { label: 'Gold ETF vs SGB',            highlight: false, prompt: 'Compare Gold ETF and SGB returns and tax treatment' },
-      ];
-
-    } else if (t.includes('fd') || t.includes('fixed deposit') || t.includes('fixed income')) {
-      text = 'Your FD at <strong class="text-red">6.8%</strong> is losing to inflation (6.1% CPI = 0.7% real return). Unity SFB offers <strong class="text-gold">9.1%</strong> (DICGC insured up to ₹5L). For amounts above ₹5L, Bharat Bond ETF (7.5% sovereign-backed) is more tax-efficient.';
-      chips = [
-        { label: 'Switch to Unity SFB 9.1%', highlight: true,  prompt: 'How to open Unity Small Finance Bank FD safely?' },
-        { label: 'Bharat Bond ETF',          highlight: false, prompt: 'Tell me about Bharat Bond ETF as FD alternative' },
-      ];
-
-    } else if (t.includes('et prime') || t.includes('prime content') || t.includes('what is new')) {
-      text = 'On <strong class="text-gold">ET Prime Wealth today</strong>: "RBI rate hold — FD strategy for 2025", "Budget ELSS impact deep dive", and an exclusive Motilal Oswal CIO webinar on Thursday. Your unread queue: 7 articles matched to your wealth-building goal.';
-      chips = [
-        { label: 'Read RBI FD strategy',  highlight: true,  prompt: 'Tell me key points from the RBI rate hold article on ET Prime' },
-        { label: 'Thursday webinar',      highlight: false, prompt: 'How do I register for Motilal Oswal CIO webinar?' },
-        { label: 'My matched articles',   highlight: false, prompt: 'Show me ET Prime articles matched to my profile today' },
-      ];
-
-    } else if (t.includes('event') || t.includes('summit') || t.includes('masterclass') || t.includes('webinar')) {
-      text = 'Two events matched: <strong class="text-gold">ET Wealth Summit (Mar 28)</strong> — Nilesh Shah + Prashant Jain keynoting, included in your Prime plan. And <strong class="text-gold">ET Masterclass: Portfolio for the 30s</strong> — 2 seats left, ₹999 (free with Wealth tier).';
-      chips = [
-        { label: 'Register for ET Summit',    highlight: true,  prompt: 'Register me for ET Wealth Summit on March 28' },
-        { label: 'Enrol in Masterclass',      highlight: false, prompt: 'Enrol me in ET Portfolio Masterclass for the 30s' },
-        { label: 'All upcoming ET events',    highlight: false, prompt: 'Show all upcoming ET events webinars and masterclasses' },
-      ];
-
-    } else if (t.includes('discovery') || t.includes('score') || t.includes('unlock') || t.includes('how to improve')) {
-      text = 'Discovery Score: <strong class="text-gold">68/100</strong>. Unlock 32 more pts: sync portfolio via ET Markets (+10), activate one financial service (+8), attend ET event (+7), complete a masterclass (+7). At 85+, you unlock the ET Wealth dedicated RM service.';
-      chips = [
-        { label: 'Sync portfolio (+10 pts)',   highlight: true,  prompt: 'How do I sync my portfolio with ET Markets?' },
-        { label: 'Activate a service (+8 pts)', highlight: false, prompt: 'Which financial service should I activate first?' },
-        { label: 'Unlock ET Wealth RM',        highlight: false, prompt: 'What does the ET Wealth dedicated RM service offer?' },
-      ];
-
-    } else if (t.includes('hello') || t.includes('hi ') || t.includes('good morning') || t.includes('hey') || t.match(/^hi$/i)) {
-      text = `Good to have you back, <strong class="text-gold">Durgesh </strong>. NIFTY is up today — your portfolio outperformed. You have 4 matched opportunities and the ET Wealth Summit is in 3 days. Your retirement gap is the priority action this week. Where shall we start?`;
-      chips = [
-        { label: 'Portfolio snapshot',       highlight: false, prompt: 'Show me my full portfolio snapshot' },
-        { label: 'Close retirement gap',     highlight: true,  prompt: 'How do I close my retirement gap of 29 lakhs?' },
-        { label: 'My matched opportunities', highlight: false, prompt: 'Show me all 4 opportunities matched to me today' },
-      ];
-
+    // ── CATCH-ALL — always contextual ─────────────────────────────────────
     } else {
-      text = `Based on your <strong class="text-gold">Wealth profile</strong>, the priority action is addressing your <strong class="text-red">₹29L retirement gap</strong>. 
-I can also:
-- Surface <strong class="text-gold">ET Markets</strong> top picks.
-- Optimize <strong class="text-gold">FY26 Tax</strong> (₹88.5K remaining).
-- Explore <strong class="text-gold">ET Masterclasses</strong>.
-<strong class="text-gold">Where should we focus our strategy today?</strong>`;
+      const sensexDir = m.sensex.pct >= 0 ? 'up' : 'down';
+      if (hasPortfolio) {
+        const p = this.portfolio.portfolio();
+        text = `Great question! With your <strong class="text-gold">${this.portfolio.formatCurrency(p.totalNetWorth)}</strong> portfolio and markets ${sensexDir} (SENSEX ${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%), here's what I'd prioritise:
+- 📊 ${p.allocations[0]?.name} review (your largest holding at ${p.allocations[0]?.percentage}%)
+- 💰 FY26 tax optimisation
+- 🎯 ET Wealth Summit (Mar 28)
+<strong class="text-gold">Which area interests you most?</strong>`;
+      } else {
+        text = `I can help you with <strong class="text-gold">live market analysis</strong> (SENSEX ${sensexDir} ${Math.abs(m.sensex.pct)}%), <strong class="text-gold">investment ideas</strong>, <strong class="text-gold">tax planning</strong>, and much more from the ET ecosystem. Complete your profile for personalised recommendations! <strong class="text-gold">What would you like to explore?</strong>`;
+      }
       chips = [
-        { label: '🚀 Fix Retirement Gap', highlight: true,  prompt: 'What is the fastest way to close my retirement gap?' },
-        { label: '📈 ET Markets Picks',  highlight: false, prompt: 'Show me ET Markets top mutual fund picks for my profile' },
-        { label: '💰 Tax Optimization',  highlight: false, prompt: 'How can I save maximum tax for FY26?' },
+        { label: '📈 Market Pulse', highlight: true, prompt: 'How are the markets doing today?' },
+        { label: '💡 Investment Ideas', highlight: false, prompt: 'What are the best investment options right now?' },
+        { label: '📰 ET Prime', highlight: false, prompt: 'What is trending on ET Prime today?' },
       ];
     }
 
@@ -412,6 +428,12 @@ I can also:
   // ── Contextual chips for Gemini responses ─────────────────────────────────
   private getContextualChips(trigger: string): RecommendationChip[] {
     const t = trigger.toLowerCase();
+    if (t.includes('market') || t.includes('sensex') || t.includes('nifty')) {
+      return [
+        { label: '📊 Impact on portfolio', highlight: true,  prompt: 'How does this market move affect my portfolio?' },
+        { label: '📈 ET Markets picks',    highlight: false, prompt: 'Show ET Markets top picks today' },
+      ];
+    }
     if (t.includes('sip') || t.includes('fund') || t.includes('invest')) {
       return [
         { label: 'Start this SIP now',      highlight: true,  prompt: 'Start the recommended SIP now' },
@@ -431,8 +453,8 @@ I can also:
       ];
     }
     return [
-      { label: 'Tell me more',         highlight: false, prompt: `Tell me more about: ${trigger.slice(0, 50)}` },
-      { label: 'Related opportunities', highlight: false, prompt: 'What ET opportunities relate to this?' },
+      { label: '📊 My Portfolio',   highlight: true,  prompt: 'Show my portfolio snapshot' },
+      { label: '📈 Market Update',  highlight: false, prompt: 'How are the markets doing today?' },
     ];
   }
 
@@ -444,16 +466,15 @@ I can also:
     this.activeMode.set(mode);
 
     const modePrompts: Record<string, string> = {
-      Markets:  'Switch to Markets mode — show me my ET Markets watchlist and top picks today',
-      Services: 'Switch to Services mode — show me all ET financial services matched to my profile',
-      Goals:    'Switch to Goals mode — show me all my financial goals and progress',
+      Markets:  'How are the markets doing today? Show me SENSEX and NIFTY live data.',
+      Services: 'Show me all ET financial services matched to my profile',
+      Goals:    'Show me all my financial goals and progress',
     };
     if (modePrompts[mode]) {
       this.sendMessage(modePrompts[mode]);
     }
   }
 
-  // Fulfilment Agent: simulate completing an action
   markActionDone(msgId: string, actionLabel: string): void {
     this.messages.update(msgs =>
       msgs.map(m => {
@@ -467,7 +488,6 @@ I can also:
       })
     );
 
-    // Confirmation message from fulfilment agent
     setTimeout(() => {
       this.messages.update(msgs => [
         ...msgs,
