@@ -37,7 +37,11 @@ export class ChatService {
     const m = this.market.snapshot();
     const p = this.portfolio.portfolio();
     const user = this.userSvc.profile();
+<<<<<<< HEAD
     const hasPortfolio = this.portfolio.isReady();
+=======
+    const hasPortfolio = this.userSvc.profile().profileComplete;
+>>>>>>> 6148e50d (chore: revert ugly UI changes, keep new chat flow)
 
     const portfolioBlock = hasPortfolio
       ? `REAL-TIME PORTFOLIO (LIVE):
@@ -87,7 +91,11 @@ RULES:
   private loadInitialMessages(): void {
     const m = this.market.snapshot();
     const user = this.userSvc.profile();
+<<<<<<< HEAD
     const hasPortfolio = this.portfolio.isReady();
+=======
+    const hasPortfolio = this.userSvc.profile().profileComplete;
+>>>>>>> 6148e50d (chore: revert ugly UI changes, keep new chat flow)
 
     const sensexDir = m.sensex.pct >= 0 ? 'up' : 'down';
     const sensexColor = m.sensex.pct >= 0 ? 'green' : 'red';
@@ -148,6 +156,7 @@ RULES:
       { id: this.mkId(), role: 'user', timestamp: new Date(), text },
     ]);
 
+<<<<<<< HEAD
     // ── Discovery tracking — unlock ET touchpoints based on conversation topics ──
     const t = text.toLowerCase();
     if (t.includes('market') || t.includes('sensex') || t.includes('nifty')) this.userSvc.unlockDiscovery('markets');
@@ -159,6 +168,8 @@ RULES:
     if (t.includes('goal') || t.includes('retire') || t.includes('target')) this.userSvc.unlockDiscovery('goalSetting');
     if (t.includes('recommend') || t.includes('suggest') || t.includes('should i')) this.userSvc.unlockDiscovery('crossSell');
 
+=======
+>>>>>>> 6148e50d (chore: revert ugly UI changes, keep new chat flow)
     // Opportunity Agent: keyword interrupt check
     const opportunityMatch = this.portfolio.getOpportunityByKeyword(text);
     const lastMsgs = this.messages();
@@ -290,7 +301,11 @@ RULES:
   private localEngine(input: string): ChatMessage {
     const t = input.toLowerCase();
     const m = this.market.snapshot();
+<<<<<<< HEAD
     const hasPortfolio = this.portfolio.isReady();
+=======
+    const hasPortfolio = this.userSvc.profile().profileComplete;
+>>>>>>> 6148e50d (chore: revert ugly UI changes, keep new chat flow)
     const user = this.userSvc.profile();
 
     let text: string;
