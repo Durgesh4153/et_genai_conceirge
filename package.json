@@ -1,6 +1,7 @@
 {
-  "name": "et-concierge",
-  "version": "2.0.0",
+  "name": "et-concierge-v2",
+  "version": "2.1.0",
+  "description": "Elite Multi-Agent Financial Intelligence Layer for the Economic Times Ecosystem.",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

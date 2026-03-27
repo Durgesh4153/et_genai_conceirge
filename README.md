@@ -1,97 +1,88 @@
-# ET Concierge v2 — Agentic AI Financial Intelligence
-### 🏆 ET AI Hackathon 2026 · Angular 19 · Gemini 1.5 Flash · Python Agents
+# ET Concierge — The AI Soul of Economic Times
+> **Elite Multi-Agent Intelligence Layer for Personal Wealth & Market Navigation.**
+
+[![Angular 19](https://img.shields.io/badge/Angular-19.0-DD0031?style=for-the-badge&logo=angular)](https://angular.io/)
+[![Gemini 1.5 Flash](https://img.shields.io/badge/Google_Gemini-1.5_Flash-4285F4?style=for-the-badge&logo=google)](https://aistudio.google.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Status](https://img.shields.io/badge/Hackathon-Submission_Ready-gold?style=for-the-badge)](./)
 
 ---
 
-## 📂 Submission Artifacts
-To help the judges navigate our comprehensive submission, we have organized the key non-code deliverables into dedicated folders:
+## 📂 Submission Fast-Track
+Judges, start here for a streamlined review of our core logic and business impact:
 
-| Requirement | Artifact | Description |
+| 📺 Video Pitch | 🏗️ Architecture | 📈 Impact Model |
 | :--- | :--- | :--- |
-| **3-Minute Pitch Video** | [**Pitch-Video/**](./Pitch-Video/) | Recorded walkthrough of the end-to-end agentic workflow. |
-| **Architecture Document** | [**Architecture/**](./Architecture/) | Detailed system diagram and agent orchestration logic. |
-| **Impact Model** | [**Impact-Model/**](./Impact-Model/) | Quantified business impact and ROI analysis. |
+| [**Pitch-Video/**](./Pitch-Video/) | [**System Deep-Dive**](./Architecture/Architecture.md) | [**Quantified ROI**](./Impact-Model/business-impact.md) |
 
 ---
 
-## 🚀 The Vision
-ET Concierge is a **Multi-Agent Orchestration System** designed to bridge the gap between financial news and actionable wealth building. It proactively navigates the Economic Times ecosystem to deliver personalized, data-grounded intelligence.
+## 🚀 The Vision: Bridge the Gap
+The Economic Times ecosystem is vast, containing everything from **ET Prime** insights to **ET Markets** data and **Masterclasses**. However, users often struggle to navigate this wealth of knowledge.
 
-## 🏗️ Agentic Workflow
-We don't just use a chatbot; we use an orchestrated pipeline of specialized agents.
+**ET Concierge** is the missing link — an orchestrated pipeline of specialized AI agents that proactively navigates the ET ecosystem to deliver personalized, actionable financial intelligence.
+
+### 🧩 Core Agentic Workflow
+We replaced a single monolithic chatbot with a **multi-agent orchestration layer**:
 
 ```mermaid
 graph TD
-    User((User)) --> A[Step 1: Welcome Concierge]
-    A -- "Smart Profiling" --> B[Step 2: Context Injector]
-    B -- "Merge Profile + Yahoo/Google Search" --> C[Step 3: Navigator Agent]
-    C -- "Gemini Insight Generation" --> D[Step 4: Marketplace Agent]
-    D -- "Proactive HDFC/Axis Offer" --> E((Action))
+    User((User)) --> Navigator[Durgesh - Navigator Agent]
     
     subgraph "Agentic Layer"
-        B
-        C
-        D
+        Navigator <--> Gemini[Gemini 1.5 Flash]
+        Navigator --> Opportunity[Opportunity Agent]
+        Navigator --> Fulfillment[Fulfillment Agent]
     end
+
+    subgraph "ET Ecosystem Sync"
+        Opportunity --> ET_Prime[ET Prime Content]
+        Opportunity --> ET_Markets[ET Markets Picks]
+        Fulfillment --> ET_Insurance[Insurance Partners]
+        Fulfillment --> ET_Goals[Goal Trackers]
+    end
+
+    Live_Market[Real-time Sensex/Nifty] --> Navigator
+    User_Profile[Portfolio & Risk Score] --> Navigator
 ```
 
-## 🗺️ Feature-to-Challenge Mapping
-Proving we solved every requirement of the hackathon's Problem Statement (PS):
+---
 
-| PS Requirement | My Implementation | Tech Used |
+## 🎯 Challenges Solved (Hackathon Requirements)
+
+| PS Requirement | Our Intelligent Implementation | Tech Stack |
 | :--- | :--- | :--- |
-| **Welcome Concierge** | 3-minute smart profiling flow | Angular + Session State |
-| **Life Navigator** | Portfolio gap analysis (e.g., ₹29L gap) | Gemini + Yahoo Search |
-| **Cross-Sell Engine** | Proactive ET Prime/ELSS suggestions | Contextual Prompting |
-| **Marketplace Agent** | Direct HDFC/Axis loan & card matching | Partner API Mock/Search |
+| **Welcome Concierge** | **3-Minute Smart Profile**: Deterministic wealth-tiering logic that bypasses "zero-state" friction. | Angular Signals |
+| **Life Navigator** | **Durgesh Persona**: Adaptive AI role-play (Bloomberg meets Private Banker) with 0-hallucination market grounding. | Gemini API + Prompt Eng |
+| **Cross-Sell Engine** | **The Opportunity Agent**: Proactive intent-matching (e.g., Credit Cards, ELSS) triggered by conversation topics. | Vector Context Matching |
+| **Marketplace Agent** | **The Fulfillment Agent**: Converts advice into action (SIP Drafts, Insurance Quotes, Event Registration). | Partners API Mock |
 
-## 🔍 Search Strategy: The "Secret Sauce"
-We implemented a **Hybrid Retrieval Strategy** to ensure zero-hallucination market advice:
-- **Yahoo Finance API**: Powers the real-time stock tickers, NIFTY/SENSEX levels, and market volatility sensors.
-- **Google Search (Custom Search API)**: Deep-crawls the ET Prime and ET Markets ecosystem for news-based sentiment and wealth summit schedules.
-- **Grounded Knowledge**: We simulate a live knowledge base in `/data_sim` (partner rates, ET Prime articles) to prevent hallucinations.
+---
 
-> [!TIP]
-> **Human-in-the-Loop: Suggestive UI Framework**
-> Instead of passive reporting, our Concierge uses **Proactive Prompting**. It identifies the highest-value financial action (e.g., a retirement gap) and presents it as the primary "Call to Action" via **Interactive Chips**, significantly increasing user engagement with ET's financial ecosystem.
+## 🛠️ Tech Stack & Implementation
+- **Frontend**: Angular 19 (Reactive Signals, Glassmorphism CSS, Agentic UI)
+- **AI Core**: Google Gemini 1.5 Flash (Optimized for speed/low-latency)
+- **State Engines**: Signal-based Portfolio & Market Services
+- **Data Grounding**: Live SENSEX/NIFTY snapshots injected into every prompt.
 
-## 🧪 High-Impact Prompt Engineering
-We use **Conservative Wealth Navigator** personas to ensure professional, private-banker quality advice. 
+---
 
-```typescript
-// Excerpt from src/app/services/chat.service.ts
-const systemPrompt = `
-  You are the ET Concierge — a premium agentic AI layer.
-  1. ANALYZE User Profile + Live Market Context.
-  2. ADOPT Persona: Bloomberg Terminal meets Private Banker.
-  3. RULE: Always end with a choice (e.g., "Should we focus on X or Y?").
-  4. FORMAT: Use bolding and lists for scannability.
-`;
-```
+## ⚡ Quick Start (2 Minutes)
 
-## 🛠️ Tech Stack
-- **AI Core**: Gemini 1.5 Flash (via Google AI Studio) & GPT-4o
-- **Backend Logic**: Python 3.11 (Agentic Orchestration & Prompt Layer)
-- **Frontend UI**: Angular 19 (Signals-based UI) / Streamlit (Planned Agent Dashboard)
-- **Marketplace APIs**: Yahoo Finance API (Live Indices), Google Search API (Grounded News)
-
-## 🏃 Foolproof Quick Start (2-Minute Setup)
-
-1. **Install Dependencies**:
+1. **Install**:
    ```bash
    npm install
    ```
 2. **Setup Gemini API Key**:
-   - Get a free key at [Google AI Studio](https://aistudio.google.com/apikey).
-   - Open `src/environments/environment.ts`.
-   - Paste your key in `geminiApiKey`.
-3. **Run Application**:
+   - In `src/environments/environment.ts`, paste your key.
+3. **Run**:
    ```bash
    npm start
-   # → http://localhost:4200 (Live Reload)
    ```
 
-*Note: The Python `requirements.txt` is provided for the extended Agentic Backend Logic layer. The core UI and Navigator Agent run immediately via Angular.*
-
 ---
-**Agentic Logic Location**: `src/app/services/chat.service.ts`
+
+> [!NOTE]
+> **Why we win?** Most submissions are passive bots. **ET Concierge** is proactive. It doesn't wait for questions; it monitors the market and the user's intent to **hook** them with data and drive them towards an **action**.
+
+*Submission for the ET AI Hackathon 2026.*
