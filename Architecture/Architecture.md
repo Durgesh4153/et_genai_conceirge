@@ -8,7 +8,7 @@ ET Concierge uses a **multi-agent, frontend-driven architecture** built on Angul
 graph TD
     Client[Web Client - Angular 19]
 
-    subgraph State Management (Signals)
+    subgraph "State Management (Signals)"
         PS[Portfolio Service]
         US[User Profile Service]
         MS[Market Data Service]
