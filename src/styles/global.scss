@@ -1,42 +1,62 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg:         #08090b;
-  --bg2:        #0f1115;
-  --bg3:        #161a20;
-  --bg4:        #1c2028;
-  --surface:    #21262f;
+  /* ── Core Backgrounds (ET Intelligence dark navy) ── */
+  --bg:         #070a0f;
+  --bg2:        #0c1018;
+  --bg3:        #111620;
+  --bg4:        #182030;
+  --surface:    #1d2535;
   --border:     rgba(255,255,255,0.06);
-  --border2:    rgba(255,255,255,0.11);
-  --border3:    rgba(255,255,255,0.18);
+  --border2:    rgba(255,255,255,0.10);
+  --border3:    rgba(255,255,255,0.16);
 
+  /* ── ET Brand Colors ── */
+  --et-red:     #e21b2f;
+  --et-red-dim: rgba(226,27,47,0.12);
+  --et-red-glow:rgba(226,27,47,0.25);
+
+  /* ── Gold / Premium ── */
   --gold:       #c9a84c;
   --gold2:      #e8c56a;
   --gold3:      #f5d98b;
-  --gold-dim:   rgba(201,168,76,0.14);
-  --gold-dim2:  rgba(201,168,76,0.07);
-  --gold-glow:  rgba(201,168,76,0.25);
+  --gold-dim:   rgba(201,168,76,0.12);
+  --gold-dim2:  rgba(201,168,76,0.06);
+  --gold-glow:  rgba(201,168,76,0.2);
 
-  --text:       #edeae4;
-  --text2:      #98a0ad;
-  --text3:      #555f6d;
+  /* ── Text ── */
+  --text:       #e8e6e1;
+  --text2:      #8a94a6;
+  --text3:      #4a5568;
 
-  --green:      #3dc97a;
-  --green-dim:  rgba(61,201,122,0.1);
-  --red:        #e05252;
-  --red-dim:    rgba(224,82,82,0.1);
-  --blue:       #4a8fff;
-  --blue-dim:   rgba(74,143,255,0.1);
+  /* ── Status Colors ── */
+  --green:      #22c55e;
+  --green-dim:  rgba(34,197,94,0.10);
+  --red:        #ef4444;
+  --red-dim:    rgba(239,68,68,0.10);
+  --blue:       #3b82f6;
+  --blue-dim:   rgba(59,130,246,0.10);
   --amber:      #f59e0b;
-  --amber-dim:  rgba(245,158,11,0.1);
+  --amber-dim:  rgba(245,158,11,0.10);
+  --purple:     #8b5cf6;
+  --purple-dim: rgba(139,92,246,0.10);
 
+  /* ── Typography ── */
   --font-display: 'Playfair Display', Georgia, serif;
-  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
   --font-mono:    'DM Mono', monospace;
 
+  /* ── Radius ── */
   --radius-sm:  6px;
   --radius-md:  10px;
-  --radius-lg:  14px;
+  --radius-lg:  16px;
+  --radius-xl:  22px;
+
+  /* ── Shadows ── */
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:  0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg:  0 8px 40px rgba(0,0,0,0.6);
+  --shadow-gold:0 0 24px rgba(201,168,76,0.15);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -49,23 +69,38 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-::-webkit-scrollbar       { width: 3px; }
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--surface); }
 
 /* ── Keyframes ── */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.25; }
 }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeScale {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(-16px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes typingBounce {
@@ -85,6 +120,31 @@ body {
   0%, 100% { border-color: rgba(201,168,76,0.2); }
   50%       { border-color: rgba(201,168,76,0.55); }
 }
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes spinCircle {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+  50%       { box-shadow: 0 0 16px 4px rgba(201,168,76,0.2); }
+}
+@keyframes scanline {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
 
 /* ── Utilities ── */
 .text-gold  { color: var(--gold2); }
@@ -94,3 +154,20 @@ body {
 strong.text-gold  { font-weight: 600; color: var(--gold2); }
 strong.text-green { font-weight: 600; color: var(--green); }
 strong.text-red   { font-weight: 600; color: var(--red); }
+
+/* ── ET Badge ── */
+.et-badge {
+  display: inline-flex; align-items: center;
+  background: var(--et-red); color: white;
+  font-size: 10px; font-weight: 800;
+  padding: 2px 6px; border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Glass Morphism ── */
+.glass-panel {
+  background: rgba(12, 16, 24, 0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.06);
+}

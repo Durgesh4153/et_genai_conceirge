@@ -100,7 +100,10 @@ RULES:
     if (hasPortfolio) {
       const p = this.portfolio.portfolio();
       const firstName = user.name.split(' ')[0];
-      greetingText = `Good evening, <strong class="text-gold">${firstName}</strong>. I'm <strong>Durgesh</strong>, your ET Concierge. Markets are ${sensexDir} today — <strong class="text-${sensexColor}">SENSEX ${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%</strong>. Your portfolio is at <strong class="text-gold">${this.portfolio.formatCurrency(p.totalNetWorth)}</strong>, ${p.monthlyChangePct > 0 ? 'up' : 'flat'} ${p.monthlyChangePct}% this month. <strong class="text-gold">Which area of your wealth should we optimize tonight — taxes, allocation, or market opportunities?</strong>`;
+      greetingText = `Good evening, <strong class="text-gold">${firstName}</strong>. I'm <strong>Durgesh</strong>, your AI Concierge for ET. 
+I've completed your 3-minute profiling and mapped your <strong class="text-gold">personalised onboarding path</strong> across the ET ecosystem.
+Your portfolio is currently at <strong class="text-gold">${this.portfolio.formatCurrency(p.totalNetWorth)}</strong>. As your <strong class="text-gold">Financial Life Navigator</strong>, I've identified some immediate optimization opportunities and exclusive offers from the <strong class="text-gold">ET Services Marketplace</strong>. 
+What area of your wealth should we tackle tonight?`;
       greetingInsights = [
         { label: 'Net Worth', value: this.portfolio.formatCurrency(p.totalNetWorth), sub: `+${p.monthlyChangePct}% MoM`, color: 'gold', action: 'portfolio' },
         { label: 'SENSEX', value: `${m.sensex.pct >= 0 ? '+' : ''}${m.sensex.pct}%`, sub: `at ${m.sensex.value.toLocaleString()}`, color: m.sensex.pct >= 0 ? 'green' : 'red', action: 'markets' },
@@ -396,6 +399,19 @@ ${hasPortfolio ? `Your ${this.portfolio.portfolio().allocations[0]?.name} alloca
       chips = [
         { label: '🛡️ Get term cover', highlight: true, prompt: 'Apply for HDFC Click2Protect term plan' },
         { label: '🏥 Health cover', highlight: false, prompt: 'Compare health insurance plans' },
+      ];
+
+    // ── SERVICES MARKETPLACE queries (PS 4) ────────────────────────────────
+    } else if (t.includes('service') || t.includes('credit card') || t.includes('loan') || t.includes('marketplace')) {
+      text = `<strong class="text-gold">ET Services Marketplace Agent</strong>: Based on your financial life profile, I've proactively identified these cross-sell opportunities from ET partners:
+- 💳 <strong>Credit Cards</strong>: Pre-approved for Axis Ace (matches your high utility spend).
+- 🏠 <strong>Home Loans</strong>: HDFC is offering 8.35% for ET Prime Wealth members, generating savings of ~₹2.8L on your profile.
+- 🛡️ <strong>Insurance</strong>: Gap identified — recommending ₹1Cr Term Plan via Max Life.
+<strong class="text-gold">My Fulfilment Agent can execute any of these. Which area should we start with?</strong>`;
+      chips = [
+        { label: '💳 Apply for Axis Ace', highlight: true, prompt: 'Apply for Axis Ace credit card' },
+        { label: '🏠 Check HDFC Home Loan', highlight: false, prompt: 'Generate in-principle approval letter' },
+        { label: '🛡️ View Insurance Gap', highlight: false, prompt: 'Show me my insurance gap analysis' },
       ];
 
     // ── GREETING ──────────────────────────────────────────────────────────

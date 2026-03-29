@@ -146,7 +146,7 @@ import { AgentType, InsightCard, RecommendationChip, XSellItem, ActionItem } fro
   `,
   styles: [`
     /* ── Layout ── */
-    .chat-wrap { display:flex; flex-direction:column; height:100vh; background:var(--bg); }
+    .chat-wrap { display:flex; flex-direction:column; height:100%; background:var(--bg); overflow: hidden; }
 
     /* ── Glassmorphism ── */
     .glass {

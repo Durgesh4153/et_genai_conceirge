@@ -158,6 +158,16 @@ export class UserProfileService {
 
   /** "Already a Member" — skip questionnaire, load pre-built portfolio, unlock discovery */
   loginAsMember(): void {
+    this.initializeMemberProfile();
+    this.showProfilingModal.set(false);
+  }
+
+  /**
+   * Sets up member profile WITHOUT closing the modal.
+   * Call this from the profiling modal during the sign-in animation,
+   * then let the modal component close itself after the welcome screen.
+   */
+  initializeMemberProfile(): void {
     this.profile.update(p => ({
       ...p,
       goal: 'Grow my wealth — equity, mutual funds, alternatives',
@@ -172,7 +182,6 @@ export class UserProfileService {
     this.unlockDiscovery('profile');
     this.unlockDiscovery('primeContent');
     this.unlockDiscovery('portfolioSync');
-    this.showProfilingModal.set(false);
     this.activateAgents(['navigator', 'opportunity', 'fulfilment']);
   }
 
