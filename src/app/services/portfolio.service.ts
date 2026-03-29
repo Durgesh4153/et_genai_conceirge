@@ -102,8 +102,10 @@ export class PortfolioService {
       else if (pf.includes('1Cr+'))  baseNW = 1_50_00_000;
       else                           baseNW = 50_00_000;
     } else {
-      baseNW = 50_00_000;
+      baseNW = 0;
     }
+    
+    if (baseNW === 0) return; // Wait for initial profile net worth answer
 
     // Adjust allocation based on goal
     const goal = (profile.goal ?? '').toLowerCase();

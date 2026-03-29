@@ -139,6 +139,7 @@ export class UserProfileService {
 
     if (ans && q) {
       this.profile.update(p => ({ ...p, [q.field]: ans }));
+      this.portfolioService.updatePortfolioFromProfile(this.profile());
     }
 
     if (this.isLastQuestion()) {

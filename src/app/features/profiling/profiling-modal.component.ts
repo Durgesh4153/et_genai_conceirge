@@ -61,10 +61,6 @@ import { UserProfileService } from '../../services/user-profile.service';
                 <span class="member-icon">👤</span>
                 Log In
               </button>
-              <button class="btn-member google-btn" (click)="profile.loginAsMember()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G" class="google-icon" />
-                Google Sign In
-              </button>
               @if (profile.profilingStep() > 0) {
                 <button class="btn-ghost" (click)="profile.skipProfile()">Skip</button>
               }
@@ -73,6 +69,15 @@ import { UserProfileService } from '../../services/user-profile.service';
                     [disabled]="!profile.selectedOption()"
                     (click)="profile.nextQuestion()">
               {{ profile.isLastQuestion() ? '✨ Build My Profile' : 'Continue →' }}
+            </button>
+          </div>
+
+          <!-- OAuth Section -->
+          <div class="oauth-container">
+            <div class="auth-divider"><span>or</span></div>
+            <button class="btn-oauth-google" (click)="profile.loginAsMember()">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" />
+              Continue with Google
             </button>
           </div>
 
@@ -205,12 +210,59 @@ import { UserProfileService } from '../../services/user-profile.service';
     }
     .btn-member:hover { background: var(--gold-dim); border-color: var(--gold); }
     .member-icon { font-size: 12px; }
-    .google-btn {
-      color: var(--text2);
-      border-color: var(--border2);
+    
+    .oauth-container {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .google-btn:hover { background: rgba(255,255,255,0.05); border-color: var(--text3); }
-    .google-icon { width: 12px; height: 12px; }
+    .auth-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      position: relative;
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: center;
+    }
+    .auth-divider span {
+      position: absolute;
+      top: -9px;
+      background: var(--bg2);
+      padding: 0 10px;
+      color: var(--text3);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn-oauth-google {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px;
+      background: #ffffff;
+      color: #3c4043;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      font-family: 'Inter', var(--font-body), sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .btn-oauth-google:hover {
+      background: #f8f9fa;
+      border-color: #d2e3fc;
+      box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+    }
+    .btn-oauth-google img {
+      width: 18px;
+      height: 18px;
+    }
+
     .btn-ghost {
       padding: 8px 12px; background: transparent;
       color: var(--text3); border: 1px solid var(--border);
