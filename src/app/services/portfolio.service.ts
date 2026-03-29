@@ -91,21 +91,16 @@ export class PortfolioService {
 
   // ── Deterministic portfolio generation based on profile answers ──────────
   updatePortfolioFromProfile(profile: any): void {
-    const inv = profile.monthlyInvestable;
+    const pf = profile.currentPortfolio;
     let baseNW: number;
 
     // Map investable surplus → estimated net worth (deterministic, no randomness)
-    if (typeof inv === 'string') {
-      if (inv.includes('Under'))          baseNW = 8_00_000;
-      else if (inv.includes('10,000–50')) baseNW = 35_00_000;
-      else if (inv.includes('50,000–2L')) baseNW = 1_80_00_000;
-      else if (inv.includes('Over'))      baseNW = 6_24_00_000;
-      else                                baseNW = 50_00_000;
-    } else if (typeof inv === 'number') {
-      if (inv < 10000)       baseNW = 8_00_000;
-      else if (inv < 50000)  baseNW = 35_00_000;
-      else if (inv < 200000) baseNW = 1_80_00_000;
-      else                   baseNW = 6_24_00_000;
+    if (typeof pf === 'string') {
+      if (pf.includes('<'))          baseNW = 4_00_000;
+      else if (pf.includes('20L)'))  baseNW = 15_00_000;
+      else if (pf.includes('1Cr)'))  baseNW = 60_00_000;
+      else if (pf.includes('1Cr+'))  baseNW = 1_50_00_000;
+      else                           baseNW = 50_00_000;
     } else {
       baseNW = 50_00_000;
     }

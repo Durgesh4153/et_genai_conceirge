@@ -1,5 +1,7 @@
 # ET Concierge — Walkthrough & Pitch Highlights
 
+**Watch the Pitch Video & Walkthrough:** [Click here to watch on Google Drive](https://drive.google.com/file/d/1LhDqORBYtlxXlxTRg1fEOqrm_MlwYSKX/view?usp=sharing)
+
 This document provides a visual walkthrough of the **ET Concierge** agentic workflow, demonstrating how our multi-agent system solves the problem of financial discovery and action within the Economic Times ecosystem.
 
 ---

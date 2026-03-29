@@ -12,6 +12,7 @@ export interface UserProfile {
   horizon:            string | null;
   etUsage:            string | null;
   blindSpot:          string | null;
+  currentPortfolio:   string | null;
   profileComplete:    boolean;
 }
 

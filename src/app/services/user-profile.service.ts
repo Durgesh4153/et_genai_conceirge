@@ -19,6 +19,7 @@ export class UserProfileService {
     horizon:           null,
     etUsage:           null,
     blindSpot:         null,
+    currentPortfolio:  null,
     profileComplete:   false,
   });
 
@@ -83,6 +84,11 @@ export class UserProfileService {
   ]);
 
   readonly profilingQuestions: ProfilingQuestion[] = [
+    {
+      question: 'What is your estimated current portfolio value?',
+      options:  ['Start fresh (< ₹5 Lakhs)', 'Building (₹5L - ₹20L)', 'Established (₹20L - ₹1Cr)', 'Wealth (₹1Cr+)'],
+      field: 'currentPortfolio',
+    },
     {
       question: 'What is your primary financial goal right now?',
       options:  [
@@ -157,6 +163,7 @@ export class UserProfileService {
       horizon: '10+ years',
       etUsage: 'Multiple ET services',
       blindSpot: 'Portfolio rebalancing',
+      currentPortfolio: 'Wealth (₹1Cr+)',
       profileComplete: true,
     }));
     this.portfolioService.loadMemberPortfolio();

@@ -59,7 +59,11 @@ import { UserProfileService } from '../../services/user-profile.service';
             <div class="footer-left">
               <button class="btn-member" (click)="profile.loginAsMember()">
                 <span class="member-icon">👤</span>
-                Already a member? →
+                Log In
+              </button>
+              <button class="btn-member google-btn" (click)="profile.loginAsMember()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G" class="google-icon" />
+                Google Sign In
               </button>
               @if (profile.profilingStep() > 0) {
                 <button class="btn-ghost" (click)="profile.skipProfile()">Skip</button>
@@ -201,6 +205,12 @@ import { UserProfileService } from '../../services/user-profile.service';
     }
     .btn-member:hover { background: var(--gold-dim); border-color: var(--gold); }
     .member-icon { font-size: 12px; }
+    .google-btn {
+      color: var(--text2);
+      border-color: var(--border2);
+    }
+    .google-btn:hover { background: rgba(255,255,255,0.05); border-color: var(--text3); }
+    .google-icon { width: 12px; height: 12px; }
     .btn-ghost {
       padding: 8px 12px; background: transparent;
       color: var(--text3); border: 1px solid var(--border);

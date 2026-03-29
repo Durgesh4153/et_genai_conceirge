@@ -12,7 +12,7 @@ Judges, start here for a streamlined review of our core logic and business impac
 
 | 📺 Video Pitch | 🏗️ Architecture | 📈 Impact Model |
 | :--- | :--- | :--- |
-| [**Pitch-Video/**](./Pitch-Video/) | [**System Deep-Dive**](./Architecture/Architecture.md) | [**Quantified ROI**](./Impact-Model/business-impact.md) |
+| [**Watch Video**](https://drive.google.com/file/d/1LhDqORBYtlxXlxTRg1fEOqrm_MlwYSKX/view?usp=sharing) \| [**Folder**](./Pitch-Video/) | [**System Deep-Dive**](./Architecture/Architecture.md) | [**Quantified ROI**](./Impact-Model/business-impact.md) |
 
 ---
 
